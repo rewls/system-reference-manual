@@ -46,6 +46,12 @@ bash [options] [command_string | file]
 
 - It can be a name, a number, or one of the special characters listed below under Special Parameters.
 
+### Positional Parameters
+
+- A positional parameter is a parameter denoted by one or more digits, other than the single digit 0.
+
+- Positional parameters are assigned from the shell's arguments when it is invoked, and may be reassigned using the set builtin command.
+
 ### Special Parameters
 
 - The shell treats several parameters specially.
