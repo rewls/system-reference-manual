@@ -54,6 +54,32 @@ find ... [starting-point...] [expression]
 
 	- Delete files; true if removal succeeded.
 
+- `-exec command ;`
+
+	- Execute command; true if 0 status is returned.
+
+	- All following arguments to find are taken to be arguments to the command until an argument consisting of `;` is encounter.
+
+	- The string `{}` is replaced by the current file name being processed everywhere it occurs in the arguments to the command.
+
+	- Both of these constructions might need to be escaped or quoted to protect them from expansion by the shell.
+
+	- The specified command is run once for each matched file.
+
+	- There are unavoidable security problems surrounding use of the -exec action; you should use the -execdir option instead.
+
+- `-execdir command ;`
+
+	- Like -exec, but the specified command is run from the subdirectory containing the matched file, which is not normally the directory in which you started find.
+
+	- As with -exec, the {} should be quoted if find is being invoked from a shell
+
+	- This a much more secure method for invoking commands, as it avoids race conditions during resolutio of the paths to the matched files.
+
+	- If you use this option, you must ensure that your $PATH environment variable does not reference `.`; otherwise, an attacker can run any commands they like by leaving an appropriately-named file in a directory in which you will run -execdir.
+
+	- The same applies to having entries in $PATH which are empty or which are not absolute directory names.
+
 - `-print`
 
 	- True; print the full file name on the standard output, followed by a newline.
