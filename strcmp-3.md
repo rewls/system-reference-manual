@@ -16,6 +16,8 @@ int strncmp(const char *s1, const char *s2, size_t n);
 
 ## DESCRIPTION
 
+- The strcmp() function compares the two strings s1 and s2.
+
 - The comparison is done using unsigned characters.
 
 - strcmp() returns an integer indicating the result of the comparison, as follows:
