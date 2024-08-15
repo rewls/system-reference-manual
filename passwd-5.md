@@ -23,3 +23,7 @@
 	- user home directory
 
 	- optional user command interpreter
+
+## SEE ALSO
+
+- getent(1)
