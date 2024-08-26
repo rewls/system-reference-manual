@@ -43,3 +43,19 @@
 	- r
 
 		- Insert the files member... into archive.
+
+	- x
+
+		- Extract members from the archive.
+
+		- You can use the v modifier with this operation, to request that ar list each name as it extracts it.
+
+		- If you do not specify a member, all files in the archive are extracted.
+
+- A number of modifiers may immediately follow the p keyletter, to specify variations on an operation's behavior:
+
+	- v
+
+		- This modifier requests the verbose version of an operation.
+
+		- Many operations display additional information, such as filenames processed, when the modifier v is appended.
