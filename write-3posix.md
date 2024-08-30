@@ -51,3 +51,23 @@ ssize_t write(int fildes, const void *buf, size_t nbyte);
 - This number shall never be greater than nbyte.
 
 - Otherwise, -1 shall be returned and errno set to indicate error.
+
+## EXAMPLES
+
+### Writing from a Buffer
+
+```c
+#include <sys/types.h>
+#include <string.h>
+...
+char buf[20];
+size_t nbytes;
+ssize_t bytes_written;
+int fd;
+...
+strcpy(buf, "This is a test\n");
+nbytes = strlen(buf);
+
+bytes_written = write(fd, buf, nbytes)
+...
+```
