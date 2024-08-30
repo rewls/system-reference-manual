@@ -27,3 +27,7 @@ truncate OPTION... FILE...
 - Binary prefixes can be used, too: KiB=K, MiB, and so on.
 
 - SIZE may also be prefixed by one of the following modifying characters: '+' extend by, '-' reduce by, '<' at most, '>' at least, '/' round down to multiple of, '%' round up to multiple of.
+
+## SEE ALSO
+
+- dd(1)
