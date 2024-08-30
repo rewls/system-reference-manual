@@ -43,3 +43,11 @@ ssize_t write(int fildes, const void *buf, size_t nbyte);
 	- Any successful read() from each byte position in the file that was modified by that write shall return the data specified by the write() for that positio until such byte positions are again modified.
 
 	- Any subsequent successful write() to the same byte position in the file shall overwrite that file data.
+
+## RETURN VALUE
+
+- Upon successful completion, these functions shall return the number of bytes actually written to the file associated with fildes.
+
+- This number shall never be greater than nbyte.
+
+- Otherwise, -1 shall be returned and errno set to indicate error.
