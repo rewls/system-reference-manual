@@ -49,3 +49,20 @@ ssize_t read(int fildes, void *buf, size_t nbyte);
 - Upon successful completion, these functions shall return a non-negative integer indicating the number of bytes actually read.
 
 - Otherwise, the functions shall return -1 and set errno to indicate the error.
+
+## EXAMPLES
+
+### Reading Data into a Buffer
+
+```c
+#include <sys/types.h>
+#include <unistd.h>
+...
+char buf[20];
+size_t nbytes;
+ssize_t bytes_read;
+int fd;
+...
+nbytes = sizeof(buf);
+bytes_read = read(fd, buf, nbytes)
+```
