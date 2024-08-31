@@ -44,6 +44,20 @@ ssize_t read(int fildes, void *buf, size_t nbyte);
 
 - For regular files,  no data transfer shall occur past the offset maximum established in the open file description associated with filedes.
 
+- A read() from a STREAMS file can read data in three different modes: byte-stream mode, message-nodiscard mode, and message-discard mode.
+
+- The default shall be byte-stream mode.
+
+- In byte-stream mode, read() shall retrieve data from the STREAM until as many bytes as were requested are transferred, or until there is no more data to be retrieved.
+
+- Byte-stream mode ignores message boundaries.
+
+- How read() handles zero-byte STREAMS messages is determined by the current read mode setting.
+
+- In byte-stream mode, read() shall accept data until is has read nbyte bytes, or until there is no more data to read, or until a zero-byte message block is encountered.
+
+- The read() function shall then return the number of bytes read, and place the zero-byte message back on the STREAM to be retrieved by the next read(), getmsg(), or getpmsg().
+
 ## RETURN VALUE
 
 - Upon successful completion, these functions shall return a non-negative integer indicating the number of bytes actually read.
