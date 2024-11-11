@@ -55,3 +55,9 @@ function name(parameter list) { statements }
 - Either the pattern may be missing, or the action may be missing.
 
 - If the pattern is missing, the action executes for every single record of input.
+
+### I/O Statements
+
+- print
+
+	- Print the current record.
