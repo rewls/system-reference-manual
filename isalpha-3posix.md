@@ -21,7 +21,11 @@ int isalpha_l(int c, locale_t locale);
 
 - This volume of POSIX.1‐2017 defers to the ISO C standard.
 
+<br>
+
 - The *isalpha*() and *isalpha_l*() functions shall test whether *c* is a character of class alpha in the current locale, or in the locale represented by *locale*, respectively; see the Base Definitions volume of POSIX.1‐2017, *Chapter 7, Locale*.
+
+<br>
 
 - The *c* argument is an **int**, the value of which the application shall ensure is representable as an **unsigned char** or equal to the value of the macro EOF. If the argument has any other value, the behavior is undefined.
 

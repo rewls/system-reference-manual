@@ -38,7 +38,7 @@ strlcat(char *dst, const char *src, size_t size);
 
 - The **strlcat**() function appends the NUL-terminated string *src* to the end of *dst*.
 
-- It will append at most *size* -strlen(dst) - 1 bytes, NUL-terminating the result.
+- It will append at most *size* - strlen(dst) - 1 bytes, NUL-terminating the result.
 
 ## RETURN VALUES
 

@@ -52,7 +52,7 @@
 
 - For example:
 
-    <pre><b>mount</b> <b>--target</b> <u>/mountpoint</u>
+    <pre><b>mount</b> <b>--target</b> <u>/mountpoint</u></pre>
 
 - The same filesystem may be mounted more than once, and in some cases (e.g., network filesystems) the same filesystem may be mounted on the same mountpoint multiple times.
 
@@ -180,7 +180,7 @@
 
 - The command
 
-    <pre>**mount** **-a** [**-t** <u>type</u>] [**-O** <u>optlist</u>]</pre>
+    <pre><b>mount</b> <b>-a</b> [<b>-t</b> <u>type</u>] [<b>-O</b> <u>optlist</u>]</pre>
 
     - (usually given in a bootscript) causes all filesystems mentioned in <u>fstab</u> (of the proper type and/or having or not having the proper options) to be mounted as indicated, except for those whose line contains the **noauto** keyword.
 
@@ -204,7 +204,7 @@
 
 - If you want to override mount options from <u>/etc/fstab</u>, you have to use the **-o** option:
 
-    <pre><b>mount</b> <u>device</u>|<u>dir</u> **-o** <u>options</u><pre>
+    <pre><b>mount</b> <u>device</u>|<u>dir</u> <b>-o</b> <u>options</u></pre>
 
     - and then the mount options from the command line will be appended to the list of options from <u>/etc/fstab</u>.
 
@@ -218,7 +218,7 @@
 
 - For example, to mount device **foo** at **/dir**:
 
-    <pre><b>mount</b> <b>/dev/foo</b> <b>/dir</b>
+    <pre><b>mount</b> <b>/dev/foo</b> <b>/dir</b></pre>
 
 - This default behaviour can be changed by using the **--options-source-force** command-line option to always read configuration from <u>fstab</u>.
 
@@ -237,7 +237,7 @@
 
     - any user can mount the iso9660 filesystem found on an inserted CDROM using the command:
 
-    <pre><b>mount</b> <b>/cd</b>
+    <pre><b>mount</b> <b>/cd</b></pre>
 
 - Note that **mount** is very strict about non-root users and all paths specified on command line are verified before <u>fstab</u> is parsed or a helper program is executed.
 
@@ -463,7 +463,7 @@
 
         - For example:
 
-            <pre><b>mount LABEL=mydisk -o noatime,nodev,nosuid</u></pre>
+            <pre><b>mount LABEL=mydisk -o noatime,nodev,nosuid</b></pre>
 
         - Note that the order of the options matters, as the last option wins if there are conflicting ones.
 
@@ -491,9 +491,9 @@
 
 - The **mount** command **automatically** creates a loop device from a regular file if a filesystem type is not specified or the filesystem is known for libblkid, for example:
 
-    <pre><b>mount /tmp/disk.img /mnt</></pre>
+    <pre><b>mount /tmp/disk.img /mnt</b></pre>
 
-    <pre><b>mount -t ext4 /tmp/disk.img /mnt</u><pre>
+    <pre><b>mount -t ext4 /tmp/disk.img /mnt</b></pre>
 
 - This type of mount knows about three options, namely **loop**, **offset** and **sizelimit**, that are really options to **losetup**(8).
 

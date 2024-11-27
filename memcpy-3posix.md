@@ -14,7 +14,7 @@ void *memcpy(void *restrict s1, const void *restrict s2, size_t n);
 
 ## DESCRIPTION
 
-- The  functionality  described  on  this reference page is aligned with the ISO C standard.
+- The functionality described on this reference page is aligned with the ISO C standard.
 
 - Any conflict between the requirements described here and the ISO C standard is unintentional.
 
@@ -22,9 +22,9 @@ void *memcpy(void *restrict s1, const void *restrict s2, size_t n);
 
 <br>
 
-- The  *memcpy*()  function  shall  copy  *n* bytes from the object pointed to by *s2* into the object pointed to by *s1*.
+- The *memcpy*() function shall copy *n* bytes from the object pointed to by *s2* into the object pointed to by *s1*.
 
-- If copying takes place between objects that overlap, the behavior is  undefined.
+- If copying takes place between objects that overlap, the behavior is undefined.
 
 ## RETURN VALUE
 
