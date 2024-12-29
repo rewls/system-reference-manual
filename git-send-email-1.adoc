@@ -1,0 +1,85 @@
+= GIT-SEND-EMAIL(1)
+
+== Name
+
+* git-send-email - Send a collection of patches as emails
+
+== Description
+
+* Takes the patches given on the command line and emails them out.
+* Patches can be specified as files, directories (which will send all files in
+  the directory), or directly as a revision list.
+* In the last case, any format accepted by *git-format-patch*(1) can be passed
+  to git send-email, as well as options understood by *git-format-patch*(1).
+
+'''
+
+* The header of the email is configurable via command-line options.
+* If not specified on the command line, the user will be prompted with a
+  ReadLine enabled interface to provide the necessary information.
+
+'''
+
+* There are two formats accepted for patch files:
+. mbox format files
+** This is what *git-format-patch*(1) generates.
+** Most headers and MIME formatting are ignored.
+. The original format used by Greg Kroah-Hartman's
+  [.underline]#send_lots_of_email.pl# script
+** This format expects the first line of the file to contain the "Cc:" value and
+   the "Subject:" of the message as the second line.
+
+== EXAMPLES
+
+=== Use gmail as the smtp server
+
+* To use [.underline]#git send-email# to send your patches through the GMail
+  SMTP server, edit ~/.gitconfig to specify your account settings:
++
+....
+    [sendemail]
+            smtpEncryption = tls
+            smtpServer = smtp.gmail.com
+            smtpUser = yourname@gmail.com
+            smtpServerPort = 587
+....
+
+* If you have multi-factor authentication set up on your Gmail account, you can
+  generate an app-specific password for use with [.underline]#git send-email#.
+* Visit https://security.google.com/settings/security/apppasswords to create it.
+
+'''
+
+* Once your commits are ready to be sent to the mailing list, run the following
+  commands:
++
+[source,sh]
+$ git format-patch --cover-letter -M origin/master -o outgoing/
+$ edit outgoing/0000-*
+$ git send-email outgoing/*
+
+* The first time you run it, you will be prompted for your credentials.
+* Enter the app-specific or your regular password as appropriate.
+* If you have credential helper configured (see *git-credential*(1)), the
+  password will be saved in the credential store so you won't have to type it
+  the next time.
+
+'''
+
+[NOTE]
+====
+* the following core Perl modules that may be installed with your distribution of Perl are required: MIME::Base64, MIME::QuotedPrint, Net::Domain and Net::SMTP.
+* These additional Perl modules are also required: Authen::SASL and Mail::Address.
+====
+
+== SEE ALSO
+
+* *git-format-patch*(1), *git-imap-send*(1), mbox(5)
+
+== GIT
+
+* Part of the *git*(1) suite
+
+|===
+|Git 2.47.1	|11/25/2024
+|===
