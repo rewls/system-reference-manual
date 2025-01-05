@@ -1,0 +1,1902 @@
+= BASH(1)
+:toc:
+:source-highlighter: rouge
+:experimental:
+
+== Name
+
+* bash -- GNU Bourne-Again SHell
+
+== Synopsis
+
+`*bash* [options] [command_string | file]`
+
+== Description
+
+* *Bash* is an *sh*-compatible command language interpreter that executes
+  commands read from the standard input or from a file.
+* *Bash* also incorporates useful features from the [.underline]#Korn# and
+  [.underline]#C# shells (*ksh* and *csh*).
+
+'''
+
+* *Bash* is intended to be a conformant implementation of the Shell and
+  Utilities portion of the IEEE POSIX specification (IEEE Standard 1003.1).
+* *Bash* can be configured to be POSIX-conformant by default.
+
+== Definitions
+
+* The following definitions are used throughout the rest of this document.
+blank::
+** A space or tab.
+word::
+** A sequence of characters considered as a single unit by the shell.
+** Also known as a *token*.
+name::
+** A [.underline]#word# consisting only of alphanumeric characters and
+   underscores, and beginning with an alphabetic character or an underscore.
+** Also referred to as an *identifier*.
+metacharacter::
+** A character that, when unquoted, separates words.
+** One of the following:
++
+`*|  & ; ( ) < > space tab newline*`
+control operator::
+** A [.underline]#token# that performs a control function.
+** It is one of the following symbols:
++
+`*|| & && ; +;;+ ;& ;;& ( ) | |& <newline>*`
+
+== Arguments
+
+* If arguments remain after option processing, and neither the `*-c*` nor the
+  `*-s*` option has been supplied, the first argument is assumed to be the name
+  of a file containing shell commands.
+* If *bash* is invoked in this fashion, `*$0*` is set to the name of the file,
+  and the positional parameters are set to the remaining arguments.
+* *Bash* reads and executes commands from this file, then exits.
+* *Bash*'s exit status is the exit status of the last command executed in the
+  script.
+* If no commands are executed, the exit status is 0.
+* An attempt is first made to open the file in the current directory, and, if no
+  file is found, then the shell searches the directories in `*PATH*` for the
+  script.
+
+== Reserved Words
+
+* [.underline]#Reserved# [.underline]#words# are words that have a special
+  meaning to the shell.
+* The following words are recognized as reserved when unquoted and either the
+  first word of a command (see *Shell Grammar* below), the third word of a
+  `*case*` or `*select*` command (only `*in*` is valid), or the third word of a
+  `*for*` command (only `*in*` and `*do*` are valid):
++
+`*! case coproc do done elif else esac fi for function if in select then
+   until while { } time [[ ]]*`
+
+== Shell Grammar
+
+* This section describes the syntax of the various forms of shell commands.
+
+=== Simple Commands
+
+* A [.underline]#simple# [.underline]#command# is a sequence of optional
+  variable assignments followed by *blank*-separated words and redirections, and
+  terminated by a [.underline]#control# [.underline]#operator#.
+* The first word specifies the command to be executed, and is passed as argument
+  zero.
+* The remaining words are passed as arguments to the invoked command.
+
+'''
+
+* The return value of a [.underline]#simple# [.underline]#command# is its exit
+  status, or 128+[.underline]#n# if the command is terminated by signal
+  [.underline]#n#.
+
+=== Pipelines
+
+* A [.underline]#pipeline# is a sequence of one or more commands separated by
+  one of the control operators `*|*` or `*|&*`.
+* The format for a pipeline is:
++
+`[*time* [*-p*]] [ ! ] [.underline]#command1# [ [*|*⎪*|&*]
+[.underline]#command2# \... ]`
+
+* The standard output of `[.underline]#command1#` is connected via a pipe to the
+  standard input of `[.underline]#command2#`.
+* This connection is performed before any redirections specified by the
+  `[.underline]#command1#`(see *Redirection* below).
+* If `*|&*` is used, ``[.underline]#command1#``'s standard error, in addition to
+  its standard output, is connected to ``[.underline]#command2#``'s standard
+  input through the pipe; it is shorthand for `*2>&1 |*`.
+* This implicit redirection of the standard error to the standard output is
+  performed after any redirections specified by `[.underline]#command1#`.
+
+'''
+
+* The return status of a pipeline is the exit status of the last command,
+  unless the `*pipefail*` option is enabled.
+* If the reserved word `*!*` precedes a pipeline, the exit status of that pipeline
+  is the logical negation of the exit status as described above.
+* The shell waits for all commands in the pipeline to terminate before returning
+  a value.
+
+'''
+
+* If the `*time*` reserved word precedes a pipeline, the elapsed as well as user
+  and system time consumed by its execution are reported when the pipeline
+  terminates.
+
+'''
+
+* Each command in a multi-command pipeline, where pipes are created, is executed
+  in a [.underline]#subshell#, which is a separate process.
+* See *Command Execution Environment* for a description of subshells and a
+  subshell environment.
+
+=== Lists
+
+* A [.underline]#list# is a sequence of one or more pipelines separated by one
+  of the operators `*;*`, `*&*`, `*&&*`, or `*||*`, and optionally terminated by
+  one of `*;*`, `*&*`, or `*<newline>*`.
+
+'''
+
+* Of these list operators, `*&&*` and `*||*` have equal precedence, followed by
+  `*;*` and `*&*`, which have equal precedence.
+
+'''
+
+* A sequence of one or more newlines may appear in a [.underline]#list# instead
+  of a semicolon to delimit commands.
+
+'''
+
+* If a command is terminated by the control operator `*&*`, the shell executes
+  the command in the [.underline]#background# in a subshell.
+* The shell does not wait for the command to finish, and the return status is 0.
+* These are referred to as [.underline]#asynchronous# commands.
+* Commands separated by a `*;*` are executed sequentially; the shell waits for
+  each command to terminate in turn.
+* The return status is the exit status of the last command executed.
+
+'''
+
+* AND and OR lists are sequences of one or more pipelines separated by the
+  `*&&*` and `*||*` control operators, respectively.
+* AND and OR lists are executed with left associativity.
+* An AND list has the form
++
+`[.underline]#command1# *&&* [.underline]#command2#`
+
+* `[.underline]#command2#` is executed if, and only if, `[.underline]#command1#`
+  returns an exit status of zero (success).
+
+'''
+
+* An OR list has the form
++
+`[.underline]#command1# *||* [.underline]#command2#`
+
+* `[.underline]#command2#` is executed if, and only if, `[.underline]#command1#`
+  returns a non-zero exit status.
+* The return status of AND and OR lists is the exit status of the last command
+  executed in the list.
+
+=== Compound Commands
+
+* A [.underline]#compound# [.underline]#command# is one of the following.
+* In most cases a [.underline]#list# in a command's description may be separated
+  from the rest of the command by one or more newlines, and may be followed by a
+  newline in place of a semicolon.
+
+'''
+
+`([.underline]#list#)`::
+* `[.underline]#list#` is executed in a subshell (see *Command Execution
+  Environment* below for a description of a subshell environment).
+* Variable assignments and builtin commands that affect the shell's environment
+  do not remain in effect after the command completes.
+* The return status is the exit status of `[.underline]#list#`.
+
+`{ [.underline]#list#; }`::
+* `[.underline]#list#` is simply executed in the current shell environment.
+* `[.underline]#list#` must be terminated with a newline or semicolon.
+* This is known as a [.underline]#group# [.underline]#command#.
+* The return status is the exit status of `[.underline]#list#`.
+* Note that unlike the metacharacters `*(*` and `*)*`, `*{*` and `*}*` are
+  [.underline]#reserved# [.underline]#words# and must occur where a reserved
+  word is permitted to be recognized.
+* Since they do not cause a word break, they must be separated from
+  `[.underline]#list#` by whitespace or another shell metacharacter.
+
+`(([.underline]#expression#))`::
+* The `[.underline]#expression#` is evaluated according to the rules described
+  below under *Arithmetic Evaluation*.
+* If the value of the expression is non-zero, the return status is 0; otherwise
+  the return status is 1.
+* The `[.underline]#expression#` undergoes the same expansions as if it were
+  within double quotes, but double quote characters in
+  `[.underline]#expression#` are not treated specially and are removed.
+
+`*+[[+* [.underline]#expression# *]]*`::
+* Return a status of 0 or 1 depending on the evaluation of the conditional
+  expression `[.underline]#expression#`.
+* Expressions are composed of the primaries described below under *Conditional
+  Expressions*.
+* The words between the `*[[*` and `*]]*` do not undergo word splitting and
+  pathname expansion.
+* The shell performs tilde expansion, parameter and variable expansion,
+  arithmetic expansion, command substitution, process substitution, and quote
+  removal on those words (the expansions that would occur if the words were
+  enclosed in double quotes).
+* Conditional operators such as `*-f*` must be unquoted to be recognized as
+  primaries.
++
+'''
+
+* When the `*==*` and `*!=*` operators are used, the string to the right of the
+  operator is considered a pattern and matched according to the rules described
+  below under *Pattern Matching*, as if the `*extglob*` shell option were
+  enabled.
+* The `*=*` operator is equivalent to `*==*`.
+* The return value is 0 if the string matches (`*==*`) or does not match
+  (`*!=*`) the pattern, and 1 otherwise.
+* Any part of the pattern may be quoted to force the quoted portion to be
+  matched as a string.
++
+'''
+
+* An additional binary operator, `*=~*`, is available, with the same precedence
+  as `*==*` and `*!=*`.
+* When it is used, the string to the right of the operator is considered a POSIX
+  extended regular expression and matched accordingly (using the POSIX
+  [.underline]#regcomp# and [.underline]#regexec# interfaces usually described
+  in [.underline]#regex#(3)).
+* The return value is 0 if the string matches the pattern, and 1 otherwise.
+* If the regular expression is syntactically incorrect, the conditional
+  expression's return value is 2.
+* If the pattern is stored in a shell variable, quoting the variable expansion
+  forces the entire pattern to be matched literally.
+* Treat bracket expressions in regular expressions carefully, since normal
+  quoting and pattern characters lose their meanings between brackets.
++
+'''
+
+* The pattern will match if it matches any part of the string.
+* Anchor the pattern using the `*^*` and `*$*` regular expression operators to
+  force it to match the entire string.
+* The array variable `*BASH_REMATCH*` records which parts of the string matched
+  the pattern.
+* The element of `*BASH_REMATCH*` with index 0 contains the portion of the
+  string matching the entire regular expression.
+* Substrings matched by parenthesized subexpressions within the regular
+  expression are saved in the remaining `*BASH_REMATCH*` indices.
+* The element of `*BASH_REMATCH*` with index [.underline]#n# is the portion of
+  the string matching the [.underline]##n##th parenthesized subexpression.
+* Bash sets `*BASH_REMATCH*` in the global scope; declaring it as a local
+  variable will lead to unexpected results.
++
+'''
+
+* Expressions may be combined using the following operators, listed in
+  decreasing order of precedence:
+
+`*(* [.underline]#expression# *)*`:::
+** Returns the value of `[.underline]#expression#`.
+** This may be used to override the normal precedence of operators.
+
+`*!*[.underline]#expression#`:::
+** True if `[.underline]#expression#` is false.
+
+`[.underline]#expression1# *&&* [.underline]#expression2#`:::
+** True if both `[.underline]#expression1#` and `[.underline]#expression2#` are
+   true.
+
+`[.underline]#expression1# *||* [.underline]#expression2#`:::
+** True if either `[.underline]#expression1#` or `[.underline]#expression2#` is
+   true.
+
+* The `*&&*` and `*||*` operators do not evaluate `[.underline]#expression2#` if
+  the value of `[.underline]#expression1#` is sufficient to determine the return
+  value of the entire conditional expression.
+
+`*for* [.underline]#name# +[ [+ *in* +[+ [.underline]#word# [.underline]#\...# ] ] ; ] *do* [.underline]#list# ; *done*`::
+* The list of words following `*in*` is expanded, generating a list of items.
+* The variable `[.underline]#name#` is set to each element of this list in turn,
+  and `[.underline]#list#` is executed each time.
+* If the `*in* [.underline]#word#` is omitted, the `*for*` command executes
+  `[.underline]#list#` once for each positional parameter that is set (see
+  *Parameters* below).
+* The return status is the exit status of the last command that executes.
+* If the expansion of the items following `*in*` results in an empty list, no
+  commands are executed, and the return status is 0.
+
+`*for* +((+ [.underline]#expr1# ; [.underline]#expr2# ; [.underline]#expr3# )) ; *do* [.underline]#list# ; *done*`::
+* First, the arithmetic expression `[.underline]#expr1#` is evaluated according
+  to the rules described below under *Arithmetic Evaluation*.
+* The arithmetic expression `[.underline]#expr2#` is then evaluated repeatedly
+  until it evaluates to zero.
+* Each time `[.underline]#expr2#` evaluates to a non-zero value,
+  `[.underline]#list#` is executed and the arithmetic expression
+  `[.underline]#expr3#` is evaluated.
+* If any expression is omitted, it behaves as if it evaluates to 1.
+* The return value is the exit status of the last command in [.underline]#list#
+  that is executed, or false if any of the expressions is invalid.
+
+`*select* [.underline]#name# +[+ *in* [.underline]#word# ] ; *do* [.underline]#list# ; *done*`::
+* The list of words following `*in*` is expanded, generating a list of items, and
+  the set of expanded words is printed on the standard error, each preceded by a
+  number.
+* If the `*in* [.underline]#word#` is omitted, the positional parameters are
+  printed (see *Parameters* below).
+* `*select*` then displays the `*PS3*` prompt and reads a line from the standard
+  input.
+* If the line consists of a number corresponding to one of the displayed words,
+  then the value of `[.underline]#name#` is set to that word.
+* If the line is empty, the words and prompt are displayed again.
+* If EOF is read, the `*select*` command completes and returns 1.
+* Any other value read causes `[.underline]#name#` to be set to null.
+* The line read is saved in the variable `*REPLY*`.
+* The `[.underline]#list#` is executed after each selection until a `*break*`
+  command is executed.
+* The exit status of `*select*` is the exit status of the last command executed
+  in `[.underline]#list#`, or zero if no commands were executed.
+
+`*case* [.underline]#word# *in* [ [(] [.underline]#pattern# +[+ *|* [.underline]#pattern# ] \... ) [.underline]#list# ;; ] \... *esac*`::
+* A `*case*` command first expands `[.underline]#word#`, and tries to match it
+  against each `[.underline]#pattern#` in turn, using the matching rules
+  described under *Pattern Matching* below.
+* The `[.underline]#word#` is expanded using tilde expansion, parameter and
+  variable expansion, arithmetic expansion, command substitution, process
+  substitution and quote removal.
+* Each `[.underline]#pattern#` examined is expanded using tilde expansion,
+  parameter and variable expansion, arithmetic expansion, command substitution,
+  process substitution, and quote removal.
+* When a match is found, the corresponding `[.underline]#list#` is executed.
+* If the `*;;*` operator is used, no subsequent matches are attempted after the
+  first pattern match.
+* Using `*;&*` in place of `*;;*` causes execution to continue with the
+  `[.underline]#list#` associated with the next set of patterns.
+* Using `*;;&*` in place of `*;;*` causes the shell to test the next pattern
+  list in the statement, if any, and execute any associated `[.underline]#list#`
+  on a successful match, continuing the case statement execution as if the
+  pattern list had not matched.
+* The exit status is zero if no pattern matches.
+* Otherwise, it is the exit status of the last command executed in
+  `[.underline]#list#`.
+
+`*if* [.underline]#list#; *then* [.underline]#list#; +[+ *elif* [.underline]#list#; *then* [.underline]#list#; ] \... +[+ *else* [.underline]#list#; ] *fi*`::
+* The `*if*` `[.underline]#list#` is executed.
+* If its exit status is zero, the `*then*` `[.underline]#list#` is executed.
+* Otherwise, each `*elif*` `[.underline]#list#` is executed in turn, and if its
+  exit status is zero, the corresponding `*then*` `[.underline]#list#` is executed
+  and the command completes.
+* Otherwise, the `*else*` `[.underline]#list#` is executed, if present.
+* The exit status is the exit status of the last command executed, or zero if no
+  condition tested true.
+
+`*while* [.underline]#list-1#; *do* [.underline]#list-2#; *done*`::
+`*until* [.underline]#list-1#; *do* [.underline]#list-2#; *done*`::
+* The `*while*` command continuously executes the list `[.underline]#list-2#` as
+  long as the last command in the list `[.underline]#list-1#` returns an exit
+  status of zero.
+* The `*until*` command is identical to the `*while*` command, except that the
+  test is negated: `[.underline]#list-2#` is executed as long as the last
+  command in `[.underline]#list-1#` returns a non-zero exit status.
+* The exit status of the `*while*` and `*until*` commands is the exit status of
+  the last command executed in `[.underline]#list-2#`, or zero if none was
+  executed.
+
+=== Shell Function Definitions
+
+* A shell function is an object that is called like a simple command and
+  executes a compound command with a new set of positional parameters.
+* Shell functions are declared as follows:
+
+`[.underline]#fname# () [.underline]#compound-command# +[+[.underline]#redirection#]`::
+`*function* [.underline]#fname# [()] [.underline]#compound-command# +[+[.underline]#redirection#]`::
+** This defines a function named `[.underline]#fname#`.
+** The reserved word `*function*` is optional.
+** If the `*function*` reserved word is supplied, the parentheses are optional.
+** The [.underline]#body# of the function is the compound command
+   [.underline]#compound-command# (see *Compound Commands* above).
+** That command is usually a `[.underline]#list#` of commands between { and },
+   but may be any command listed under *Compound Commands* above.
+** If the `*function*` reserved word is used, but the parentheses are not
+   supplied, the braces are recommended.
+** `[.underline]#compound-command#` is executed whenever `[.underline]#fname#`
+   is specified as the name of a simple command.
+** In default mode, a function name can be any unquoted shell word that does
+   not contain `*$*`.
+** Any redirections (see *Redirection* below) specified when a function is
+   defined are performed when the function is executed.
+** The exit status of a function definition is zero unless a syntax error occurs
+   or a readonly function with the same name already exists.
+** When executed, the exit status of a function is the exit status of the last
+   command executed in the body.
+*** See *Functions* below.
+
+== Comments
+
+* In a non-interactive shell, or an interactive shell in which the
+  `*interactive_comments*` option to the `*shopt*` builtin is enabled (see
+  *Shell Builtin Commands* below), a word beginning with `*#*` causes that word
+  and all remaining characters on that line to be ignored.
+* An interactive shell without the `*interactive_comments*` option enabled does
+  not allow comments.
+* The `*interactive_comments*` option is on by default in interactive shells.
+
+== Quoting
+
+* [.underline]#Quoting# is used to remove the special meaning of certain
+  characters or words to the shell.
+* Quoting can be used to disable special treatment for special characters, to
+  prevent reserved words from being recognized as such, and to prevent parameter
+  expansion.
+
+'''
+
+* Each of the [.underline]#metacharacters# listed above under *Definitions* has
+  special meaning to the shell and must be quoted if it is to represent itself.
+
+'''
+
+* When the command history expansion facilities are being used (see *History
+  Expansion* below), the [.underline]#history# [.underline]#expansion#
+  character, usually `*!*`, must be quoted to prevent history expansion.
+
+'''
+
+* There are three quoting mechanisms: the [.underline]#escape#
+  [.underline]#character#, single quotes, and double quotes.
+
+'''
+
+* A non-quoted backslash (`*\*`) is the [.underline]#escape#
+  [.underline]#character#.
+* It preserves the literal value of the next character that follows, with the
+  exception of `<newline>`.
+* If a `*\*<newline>` pair appears, and the backslash is not itself quoted, the
+  `*\*<newline>` is treated as a line continuation (that is, it is removed from
+  the input stream and effectively ignored).
+
+'''
+
+* Enclosing characters in single quotes preserves the literal value of each
+  character within the quotes.
+* A single quote may not occur between single quotes, even when preceded by a
+  backslash.
+
+'''
+
+* Enclosing characters in double quotes preserves the literal value of all
+  characters within the quotes, with the exception of `*$*`, `*+`+*`, `*+\+*`,
+  and, when history expansion is enabled, `*!*`.
+* The characters `*$*` and `*+`+*` retain their special meaning within double
+  quotes.
+* The backslash retains its special meaning only when followed by one of the
+  following characters: `*$*`, `*+`+*`, `*"*`, `*+\+*`, or `*<newline>*`.
+* A double quote may be quoted within double quotes by preceding it with a
+  backslash.
+* If enabled, history expansion will be performed unless an `*!*` appearing in
+  double quotes is escaped using a backslash.
+* The backslash preceding the `*!*` is not removed.
+
+'''
+
+* The special parameters `*+*+*` and `*@*` have special meaning when in double
+  quotes (see *Parameters* below).
+
+'''
+
+* Character sequences of the form `*$*'[.underline]#string#'` are treated as a
+  special variant of single quotes.
+* The sequence expands to `[.underline]#string#`, with backslash-escaped
+  characters in `[.underline]#string#` replaced as specified by the ANSI C
+  standard.
+* Backslash escape sequences, if present, are decoded as follows:
+
+`*\n*`::
+** new line
+`*\t*`::
+** horizontal tab
+`*\*[.underline]#nnn#`::
+** the eight-bit character whose value is the octal value `[.underline]#nnn#`
+  (one to three octal digits)
+`*\x*[.underline]#HH#`::
+** the eight-bit character whose value is the hexadecimal value
+  `[.underline]#HH#` (one or two hex digits)
+`*\u*[.underline]#HHHH#`::
+** the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+   `[.underline]#HHHH#` (one to four hex digits)
+`*\U*[.underline]#HHHHHHHH#`::
+** the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+   `[.underline]#HHHHHHHH#` (one to eight hex digits)
+
+* The expanded result is single-quoted, as if the dollar sign had not been
+  present.
+
+== Parameters
+
+* A [.underline]#parameter# is an entity that stores values.
+* It can be a [.underline]#name#, a number, or one of the special characters
+  listed below under *Special Parameters*.
+* A [.underline]#variable# is a parameter denoted by a [.underline]#name#.
+* A variable has a [.underline]#value# and zero or more
+  [.underline]#attributes#.
+* Attributes are assigned using the `*declare*` builtin command (see `*declare*`
+  below in *Shell Builtin Commands*).
+
+'''
+
+* A parameter is set if it has been assigned a value.
+* The null string is a valid value.
+* Once a variable is set, it may be unset only by using the `*unset*` builtin
+  command (see *Shell Builtin Commands* below).
+
+'''
+
+* A [.underline]#variable# may be assigned to by a statement of the form
++
+`[.underline]#name#=+[+[.underline]#value#]`
+
+'''
+
+* If `[.underline]#value#` is not given, the variable is assigned the null
+  string.
+* All `[.underline]#values#` undergo tilde expansion, parameter and variable
+  expansion, command substitution, arithmetic expansion, and quote removal (see
+  *Expansion* below).
+* If the variable has its *integer* attribute set, then `[.underline]#value#` is
+  evaluated as an arithmetic expression even if the `$((...))` expansion is not
+  used (see *Arithmetic Expansion* below).
+* Word splitting and pathname expansion are not performed.
+* Assignment statements may also appear as arguments to the `*alias*`,
+  `*declare*`, `*typeset*`, `*export*`, `*readonly*`, and `*local*` builtin
+  commands ([.underline]#declaration# commands).
+
+'''
+
+* In the context where an assignment statement is assigning a value to a shell
+  variable or array index, the `+=` operator can be used to append to or add to
+  the variable's previous value.
+* This includes arguments to builtin commands such as `*declare*` that accept
+  assignment statements ([.underline]#declaration# commands).
+* When `+=` is applied to a variable for which the `*integer*` attribute has
+  been set, `[.underline]#value#` is evaluated as an arithmetic expression and
+  added to the variable's current value, which is also evaluated.
+* When `+=` is applied to an array variable using compound assignment (see
+  *Arrays* below), the variable's value is not unset (as it is when using `=`),
+  and new values are appended to the array beginning at one greater than the
+  array's maximum index (for indexed arrays) or added as additional key-value
+  pairs in an associative array.
+* When applied to a string-valued variable, `[.underline]#value#` is expanded and
+  appended to the variable's value.
+
+'''
+
+* A variable can be assigned the `[.underline]#nameref#` attribute using the
+  `*-n*` option to the `*declare*` or `*local*` builtin commands (see the
+  descriptions of `*declare*` and `*local*` below) to create a
+  `[.underline]#nameref#`, or a reference to another variable.
+* This allows variables to be manipulated indirectly.
+* Whenever the nameref variable is referenced, assigned to, unset, or has its
+  attributes modified (other than using or changing the [.underline]#nameref#
+  attribute itself), the operation is actually performed on the variable
+  specified by the nameref variable's value.
+* A nameref is commonly used within shell functions to refer to a variable whose
+  name is passed as an argument to the function.
+* For instance, if a variable name is passed to a shell function as its first
+  argument, running
++
+[source,sh]
+declare -n ref=$1
+
+** inside the function creates a nameref variable `*ref*` whose value is the
+   variable name passed as the first argument.
+* References and assignments to `*ref*`, and changes to its attributes, are
+  treated as references, assignments, and attribute modifications to the
+  variable whose name was passed as `*$1*`.
+* If the control variable in a `*for*` loop has the nameref attribute, the list of
+  words can be a list of shell variables, and a name reference will be
+  established for each word in the list, in turn, when the loop is executed.
+* Array variables cannot be given the `*nameref*` attribute.
+* However, nameref variables can reference array variables and subscripted array
+  variables.
+* Namerefs can be unset using the `*-n*` option to the `*unset*` builtin.
+* Otherwise, if `*unset*` is executed with the name of a nameref variable as an
+  argument, the variable referenced by the nameref variable will be unset.
+
+=== Positional Parameters
+
+* A [.underline]#positional# [.underline]#parameter# is a parameter denoted by
+  one or more digits, other than the single digit 0.
+* Positional parameters are assigned from the shell's arguments when it is
+  invoked, and may be reassigned using the `*set*` builtin command.
+* Positional parameters may not be assigned to with assignment statements.
+* The positional parameters are temporarily replaced when a shell function is
+  executed (see *Functions* below).
+
+'''
+
+* When a positional parameter consisting of more than a single digit is
+  expanded, it must be enclosed in braces (see *Expansion* below).
+
+=== Special Parameters
+
+* The shell treats several parameters specially.
+* These parameters may only be referenced; assignment to them is not allowed.
+
+`***`::
+** Expands to the positional parameters, starting from one.
+** When the expansion is not within double quotes, each positional parameter
+   expands to a separate word.
+** In contexts where it is performed, those words are subject to further word
+   splitting and pathname expansion.
+** When the expansion occurs within double quotes, it expands to a single word
+   with the value of each parameter separated by the first character of the
+  *IFS* special variable.
+** That is, `"*$**"` is equivalent to
+   `"*$1*[.underline]#c#*$2*[.underline]#c#*\...*"`, where [.underline]#c# is
+   the first character of the value of the *IFS* variable.
+** If *IFS* is unset, the parameters are separated by spaces.
+** If *IFS* is null, the parameters are joined without intervening separators.
+
+`*@*`::
+** Expands to the positional parameters, starting from one.
+** In contexts where word splitting is performed, this expands each positional
+   parameter to a separate word; if not within double quotes, these words are
+   subject to word splitting.
+** In contexts where word splitting is not performed, this expands to a single
+   word with each positional parameter separated by a space.
+** When the expansion occurs within double quotes, each parameter expands to a
+   separate word.
+** That is, `"*$@*"` is equivalent to `"*$1*" "*$2*" \...`
+** If the double-quoted expansion occurs within a word, the expansion of the
+   first parameter is joined with the beginning part of the original word, and
+   the expansion of the last parameter is joined with the last part of the
+   original word.
+** When there are no positional parameters, `"*$@*"` and `*$@*` expand to
+   nothing (i.e., they are removed).
+
+`*#*`::
+** Expands to the number of positional parameters in decimal.
+
+`*?*`::
+** Expands to the exit status of the most recently executed foreground pipeline.
+
+`*-*`::
+** Expands to the current option flags as specified upon invocation, by the
+   `*set*` builtin command, or those set by the shell itself (such as the `*-i*`
+   option).
+
+`*$*`::
+** Expands to the process ID of the shell.
+** In a subshell, it expands to the process ID of the current shell, not the
+   subshell.
+
+`*!*`::
+** Expands to the process ID of the job most recently placed into the
+   background, whether executed as an asynchronous command or using the `*bg*`
+   builtin (see *Job Control* below).
+
+`*0*`::
+** Expands to the name of the shell or shell script.
+** This is set at shell initialization.
+** If *bash* is invoked with a file of commands, `*$0*` is set to the name of
+   that file.
+** If *bash* is started with the `*-c*` option, then `*$0*` is set to the first
+   argument after the string to be executed, if one is present.
+** Otherwise, it is set to the filename used to invoke *bash*, as given by
+   argument zero.
+
+=== Shell Variables
+
+`*HOME*`::
+* The home directory of the current user; the default argument for the `*cd*`
+  builtin command.
+* The value of this variable is also used when performing tilde expansion.
+
+`*PATH*`::
+* The search path for commands.
+* It is a colon-separated list of directories in which the shell looks for
+  commands (see *Command Execution* below).
+* A zero-length (null) directory name in the value of `*PATH*` indicates the
+  current directory.
+* A null directory name may appear as two adjacent colons, or as an initial or
+  trailing colon.
+* The default path is system-dependent, and is set by the administrator who
+  installs bash.
+* A common value is
+  ''/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin''.
+
+=== Arrays
+
+* *Bash* provides one-dimensional indexed and associative array variables.
+* Any variable may be used as an indexed array; the `*declare*` builtin will
+  explicitly declare an array.
+* There is no maximum limit on the size of an array, nor any requirement that
+  members be indexed or assigned contiguously.
+* Indexed arrays are referenced using integers (including arithmetic
+  expressions) and are zero-based; associative arrays are referenced using
+  arbitrary strings.
+* Unless otherwise noted, indexed array indices must be non-negative integers.
+
+'''
+
+* An indexed array is created automatically if any variable is assigned to using
+  the syntax `[.underline]#name#[[.underline]#subscript#]=[.underline]#value#`.
+* The `[.underline]#subscript#` is treated as an arithmetic expression that must
+  evaluate to a number.
+* To explicitly declare an indexed array, use `*declare -a* [.underline]#name#`
+  (see *Shell Builtin Commands* below).
+* `*declare -a* [.underline]#name#*+[+*[.underline]#subscript#*]*` is also
+  accepted; the `[.underline]#subscript#` is ignored.
+
+'''
+
+* Associative arrays are created using `*declare -A* [.underline]#name#`.
+
+'''
+
+* Attributes may be specified for an array variable using the `*declare*` and
+  `*readonly*` builtins.
+* Each attribute applies to all members of an array.
+
+'''
+
+* Arrays are assigned to using compound assignments of the form
+  `[.underline]#name#=**(**value[.underline]##1## \...
+  value[.underline]##n##*)*`, where each `[.underline]#value#` may be of the form
+  `+[+[.underline]#subscript#]=[.underline]#string#`.
+* Indexed array assignments do not require anything but `[.underline]#string#`.
+* Each `[.underline]#value#` in the list is expanded using all the shell
+  expansions described below under *Expansion*.
+* When assigning to indexed arrays, if the optional brackets and subscript are
+  supplied, that index is assigned to; otherwise the index of the element
+  assigned is the last index assigned to by the statement plus one.
+* Indexing starts at zero.
+
+'''
+
+* When assigning to an associative array, the words in a compound assignment may
+  be either assignment statements, for which the subscript is required, or a
+  list of words that is interpreted as a sequence of alternating keys and
+  values: `[.underline]#name#=*(* [.underline]#key1# [.underline]#value1#
+  [.underline]#key2# [.underline]#value2# \...*)*`.
+* These are treated identically to `[.underline]#name#=*(*
+  +[+[.underline]#key1#]=[.underline]#value1#
+  +[+[.underline]#key2#]=[.underline]#value2# \...*)*`.
+* The first word in the list determines how the remaining words are interpreted;
+  all assignments in a list must be of the same type.
+* When using key/value pairs, the keys may not be missing or empty; a final
+  missing value is treated like the empty string.
+
+'''
+
+* This syntax is also accepted by the `*declare*` builtin.
+* Individual array elements may be assigned to using the
+  `[.underline]#name#[[.underline]#subscript#]=[.underline]#value#` syntax
+  introduced above.
+* When assigning to an indexed array, if `[.underline]#name#` is subscripted by
+  a negative number, that number is interpreted as relative to one greater than
+  the maximum index of `[.underline]#name#`, so negative indices count back from
+  the end of the array, and an index of -1 references the last element.
+
+'''
+
+* The `+=` operator will append to an array variable when assigning using the
+  compound assignment syntax; see *Parameters* above.
+
+'''
+
+* Any element of an array may be referenced using
+  `${[.underline]#name#[[.underline]#subscript#]}`.
+* The braces are required to avoid conflicts with pathname expansion.
+* If `[.underline]#subscript#` is `*@*` or `***`, the word expands to all
+  members of `[.underline]#name#`.
+* These subscripts differ only when the word appears within double quotes.
+* If the word is double-quoted, `${[.underline]#name#[+*+]}` expands to a single
+  word with the value of each array member separated by the first character of
+  the *IFS* special variable, and `${[.underline]#name#[@]}` expands each
+  element of `[.underline]#name#` to a separate word.
+* When there are no array members, `${[.underline]#name#[@]}` expands to
+  nothing.
+* If the double-quoted expansion occurs within a word, the expansion of the
+  first parameter is joined with the beginning part of the original word, and
+  the expansion of the last parameter is joined with the last part of the
+  original word.
+* This is analogous to the expansion of the special parameters `***` and `*@*`
+  (see *Special Parameters* above).
+* `${+#+[.underline]#name#[[.underline]#subscript#]}` expands to the length of
+  `${[.underline]#name#[[.underline]#subscript#]}`.
+* If `[.underline]#subscript#` is `***` or `*@*`, the expansion is the number of
+  elements in the array.
+* If the `[.underline]#subscript#` used to reference an element of an indexed
+  array evaluates to a number less than zero, it is interpreted as relative to
+  one greater than the maximum index of the array, so negative indices count back
+  from the end of the array, and an index of -1 references the last element.
+
+'''
+
+* Referencing an array variable without a subscript is equivalent to referencing
+  the array with a subscript of 0.
+* Any reference to a variable using a valid subscript is legal, and *bash* will
+  create an array if necessary.
+
+'''
+
+* An array variable is considered set if a subscript has been assigned a value.
+* The null string is a valid value.
+
+'''
+
+* It is possible to obtain the keys (indices) of an array as well as the values.
+* `${*!*[.underline]#name#[[.underline]#@#]}` and
+  `${*!*[.underline]#name#[[.underline]#*#]}` expand to the indices assigned in
+  array variable `[.underline]#name#`.
+* The treatment when in double quotes is similar to the expansion of the
+  special parameters `[.underline]#@#` and `[.underline]#*#` within double
+  quotes.
+
+'''
+
+* The `*unset*` builtin is used to destroy arrays.
+* `*unset* [.underline]#name#[[.underline]#subscript#]` destroys the array
+  element at index `[.underline]#subscript#`, for both indexed and associative
+  arrays.
+* Negative subscripts to indexed arrays are interpreted as described above.
+* Unsetting the last element of an array variable does not unset the variable.
+* `*unset* [.underline]#name#`, where `[.underline]#name#` is an array, removes
+  the entire array.
+* `*unset* [.underline]#name#[[.underline]#subscript#]`, where
+  `[.underline]#subscript#` is `***` or `*@*`, behaves differently depending on
+  whether `[.underline]#name#` is an indexed or associative array.
+* If `[.underline]#name#` is an associative array, this unsets the element with
+  subscript `***` or `*@*`.
+* If `[.underline]#name#` is an indexed array, unset removes all of the elements
+  but does not remove the array itself.
+
+'''
+
+* When using a variable name with a subscript as an argument to a command, such
+  as with `*unset*`, without using the word expansion syntax described above,
+  the argument is subject to pathname expansion.
+* If pathname expansion is not desired, the argument should be quoted.
+
+'''
+
+* The `*declare*`, `*local*`, and `*readonly*` builtins each accept a `*-a*`
+  option to specify an indexed array and a `*-A*` option to specify an
+  associative array.
+* If both options are supplied, `*-A*` takes precedence.
+* The `*read*` builtin accepts a `*-a*` option to assign a list of words read
+  from the standard input to an array.
+* The `*set*` and `*declare*` builtins display array values in a way that allows
+  them to be reused as assignments.
+
+== Expansion
+
+* Expansion is performed on the command line after it has been split into words.
+* There are seven kinds of expansion performed: [.underline]#brace#
+  [.underline]#expansion#, [.underline]#tilde# [.underline]#expansion#,
+  [.underline]#parameter# [.underline]#and# [.underline]#variable#
+  [.underline]#expansion#, [.underline]#command# [.underline]#substitution#,
+  [.underline]#arithmetic# [.underline]#expansion#, [.underline]#word#
+  [.underline]#splitting#, and [.underline]#pathname# [.underline]#expansion#.
+
+'''
+
+* The order of expansions is: brace expansion; tilde expansion, parameter and
+  variable expansion, arithmetic expansion, and command substitution (done in a
+  left-to-right fashion); word splitting; and pathname expansion.
+
+'''
+
+* On systems that can support it, there is an additional expansion available:
+  [.underline]#process# [.underline]#substitution#.
+* This is performed at the same time as tilde, parameter, variable, and
+  arithmetic expansion and command substitution.
+
+'''
+
+* After these expansions are performed, quote characters present in the original
+  word are removed unless they have been quoted themselves ([.underline]#quote#
+  [.underline]#removal#).
+
+'''
+
+* Only brace expansion, word splitting, and pathname expansion can increase the
+  number of words of the expansion; other expansions expand a single word to a
+  single word.
+* The only exceptions to this are the expansions of `"*$@*"` and
+  `"*${*[.underline]#name#*[@]}*"`, and, in most cases, `*$**` and
+  `*${*[.underline]#name#*[+*+]}*` as explained above (see *Parameters*).
+
+=== Brace Expansion
+
+* [.underline]#Brace# [.underline]#expansion# is a mechanism by which arbitrary
+  strings may be generated.
+* This mechanism is similar to [.underline]#pathname# [.underline]#expansion#,
+  but the filenames generated need not exist.
+* Patterns to be brace expanded take the form of an optional
+  [.underline]#preamble#, followed by either a series of comma-separated strings
+  or a sequence expression between a pair of braces, followed by an optional
+  [.underline]#postscript#.
+* The preamble is prefixed to each string contained within the braces, and the
+  postscript is then appended to each resulting string, expanding left to right.
+
+'''
+
+* Brace expansions may be nested.
+* The results of each expanded string are not sorted; left to right order is
+  preserved.
+* For example, `a**{**d,c,b**}**e` expands into `'ade ace abe'`.
+
+'''
+
+* A sequence expression takes the form
+  `*{*[.underline]#x#*..*[.underline]#y#*+[+..*[.underline]#incr#*]}*`, where
+  `[.underline]#x#` and `[.underline]#y#` are either integers or single letters,
+  and `[.underline]#incr#`, an optional increment, is an integer.
+* When integers are supplied, the expression expands to each number between
+  `[.underline]#x#` and `[.underline]#y#`, inclusive.
+* Supplied integers may be prefixed with [.underline]#0# to force each term to
+  have the same width.
+* When either `[.underline]#x#` or `[.underline]#y#` begins with a zero, the shell
+  attempts to force all generated terms to contain the same number of digits,
+  zero-padding where necessary.
+* When letters are supplied, the expression expands to each character
+  lexicographically between `[.underline]#x#` and `[.underline]#y#`, inclusive,
+  using the default C locale.
+* Note that both `[.underline]#x#` and `[.underline]#y#` must be of the same
+  type (integer or letter).
+* When the increment is supplied, it is used as the difference between each
+  term.
+* The default increment is 1 or -1 as appropriate.
+
+'''
+
+* Brace expansion is performed before any other expansions, and any characters
+  special to other expansions are preserved in the result.
+* It is strictly textual.
+* *Bash* does not apply any syntactic interpretation to the context of the
+  expansion or the text between the braces.
+
+'''
+
+* A correctly-formed brace expansion must contain unquoted opening and closing
+  braces, and at least one unquoted comma or a valid sequence expression.
+* Any incorrectly formed brace expansion is left unchanged.
+* A `*{*` or `*,*` may be quoted with a backslash to prevent its being
+  considered part of a brace expression.
+* To avoid conflicts with parameter expansion, the string `*${*` is not
+  considered eligible for brace expansion, and inhibits brace expansion until
+  the closing *}*.
+
+'''
+
+* This construct is typically used as shorthand when the common prefix of the
+  strings to be generated is longer than in the above example:
++
+[source,sh]
+mkdir /usr/local/src/bash/{old,new,dist,bugs}
+
+** or
++
+[source,sh]
+chown root /usr/{ucb/{ex,edit},lib/{ex?.?*,how_ex}}
+
+* Brace expansion introduces a slight incompatibility with historical versions
+  of *sh*.
+* *sh* does not treat opening or closing braces specially when they appear as
+  part of a word, and preserves them in the output.
+* *Bash* removes braces from words as a consequence of brace expansion.
+* For example, a word entered to *sh* as `[.underline]#file{1,2}#` appears
+  identically in the output.
+* The same word is output as `[.underline]#file1# [.underline]#file2#` after
+  expansion by *bash*.
+* If strict compatibility with *sh* is desired, start *bash* with the *+B*
+  option or disable brace expansion with the *+B* option to the *set* command
+  (see *Shell Builtin Commands* below).
+
+=== Tilde Expansion
+
+* If a word begins with an unquoted tilde character ('*~*'), all of the
+  characters preceding the first unquoted slash (or all characters, if there is
+  no unquoted slash) are considered a [.underline]#tilde-prefix#.
+* If none of the characters in the tilde-prefix are quoted, the characters in
+  the tilde-prefix following the tilde are treated as a possible
+  [.underline]#login# [.underline]#name#.
+* If this login name is the null string, the tilde is replaced with the value of
+  the shell parameter `*HOME*`.
+* If `*HOME*` is unset, the home directory of the user executing the shell is
+  substituted instead.
+* Otherwise, the tilde-prefix is replaced with the home directory associated
+  with the specified login name.
+
+'''
+
+* If the tilde-prefix is a `'~+'`, the value of the shell variable `*PWD*`
+  replaces the tilde-prefix.
+* If the tilde-prefix is a `'~-'`, the value of the shell variable `*OLDPWD*`,
+  if it is set, is substituted.
+* If the characters following the tilde in the tilde-prefix consist of a number
+  [.underline]#N#, optionally prefixed by a '+' or a '-', the tilde-prefix is
+  replaced with the corresponding element from the directory stack, as it would
+  be displayed by the `*dirs*` builtin invoked with the tilde-prefix as an
+  argument.
+* If the characters following the tilde in the tilde-prefix consist of a number
+  without a leading '+' or '-', '+' is assumed.
+
+'''
+
+* If the login name is invalid, or the tilde expansion fails, the word is
+  unchanged.
+
+'''
+
+* Each variable assignment is checked for unquoted tilde-prefixes immediately
+  following a `*:*` or the first `*=*`.
+* In these cases, tilde expansion is also performed.
+* Consequently, one may use filenames with tildes in assignments to `*PATH*`,
+  `*MAILPATH*`, and `*CDPATH*`, and the shell assigns the expanded value.
+
+'''
+
+* Bash also performs tilde expansion on words satisfying the conditions of
+  variable assignments (as described above under *Parameters*) when they appear
+  as arguments to simple commands.
+
+=== Parameter Expansion
+
+* The '*$*'  character introduces parameter expansion, command substitution, or
+  arithmetic expansion.
+* The parameter name or symbol to be expanded may be enclosed in braces, which
+  are optional but serve to protect the variable to be expanded from characters
+  immediately following it which could be interpreted as part of the name.
+
+'''
+
+* When braces are used, the matching ending brace is the first '*}*' not escaped
+  by a backslash or within a quoted string, and not within an embedded
+  arithmetic expansion, command substitution, or parameter expansion.
+
+`${[.underline]#parameter#}`::
+** The value of `[.underline]#parameter#` is substituted.
+** The braces are required when `[.underline]#parameter#` is a positional
+   parameter with more than one digit, or when `[.underline]#parameter#` is
+  followed by a character which is not to be interpreted as part of its name.
+** The `[.underline]#parameter#` is a shell parameter (as described above
+   *Parameters*) or an array reference (*Arrays*).
+
+* If the first character of `[.underline]#parameter#` is an exclamation point
+  (*!*), and `[.underline]#parameter#` is not a [.underline]#nameref#, it
+  introduces a level of indirection.
+* *Bash* uses the value formed by expanding the rest of
+  `[.underline]#parameter#` as the new `[.underline]#parameter#`; this is then
+  expanded and that value is used in the rest of the expansion, rather than the
+  expansion of the original `[.underline]#parameter#`.
+* This is known as [.underline]#indirect# [.underline]#expansion#.
+* The value is subject to tilde expansion, parameter expansion, command
+  substitution, and arithmetic expansion.
+* If `[.underline]#parameter#` is a nameref, this expands to the name of the
+  parameter referenced by `[.underline]#parameter#` instead of performing the
+  complete indirect expansion.
+* The exclamation point must immediately follow the left brace in order to
+  introduce indirection.
+
+=== Command Substitution
+
+* [.underline]#Command# [.underline]#substitution# allows the output of a
+  command to replace the command name.
+* There are two forms:
++
+`*$(*[.underline]#command#*)*`
+
+** or
++
+`*+`+*[.underline]#command#*+`+*`
+
+* *Bash* performs the expansion by executing [.underline]#command# in a subshell
+  environment and replacing the command substitution with the standard output of
+  the command, with any trailing newlines deleted.
+* Embedded newlines are not deleted, but they may be removed during word
+  splitting.
+* The command substitution `*$(cat* [.underline]#file#*)*` can be replaced by the
+  equivalent but faster `*$(<* [.underline]#file#*)*`.
+
+'''
+
+* When the old-style backquote form of substitution is used, backslash retains
+  its literal meaning except when followed by *$*, *`*, or *\*.
+* The first backquote not preceded by a backslash terminates the command
+  substitution.
+* When using the `$([.underline]#command#)` form, all characters between the
+  parentheses make up the command; none are treated specially.
+
+'''
+
+* Command substitutions may be nested.
+* To nest when using the backquoted form, escape the inner backquotes with
+  backslashes.
+
+'''
+
+* If the substitution appears within double quotes, word splitting and pathname
+  expansion are not performed on the results.
+
+=== Arithmetic Expansion
+
+* Arithmetic expansion allows the evaluation of an arithmetic expression and the
+  substitution of the result.
+* The format for arithmetic expansion is:
++
+`*$+((+*[.underline]#expression#*))*`
+
+* The `[.underline]#expression#` undergoes the same expansions as if it were
+  within double quotes, but double quote characters in
+  `[.underline]#expression#` are not treated specially and are removed.
+* All tokens in the expression undergo parameter and variable expansion, command
+  substitution, and quote removal.
+* The result is treated as the arithmetic expression to be evaluated.
+* Arithmetic expansions may be nested.
+
+'''
+
+* The evaluation is performed according to the rules listed below under
+  *Arithmetic Evaluation*.
+* If `[.underline]#expression#` is invalid, *bash* prints a message indicating
+  failure and no substitution occurs.
+
+=== Process Substitution
+
+* [.underline]#Process# [.underline]#substitution# allows a process's input or
+  output to be referred to
+  using a filename.
+* It takes the form of `**<(**[.underline]#list#**)**` or
+  `**>(**[.underline]#list#**)**`.
+* The process `[.underline]#list#` is run asynchronously, and its input or
+  output appears as a filename.
+* This filename is passed as an argument to the current command as the result of
+  the expansion.
+* If the `**>(**[.underline[list]**)**` form is used, writing to the file will
+  provide input for `[.underline]#list#`.
+* If the `**<(**[.underline]#list#**)**` form is used, the file passed as an
+  argument should be read to obtain the output of `[.underline]#list#`.
+* Process substitution is supported on systems that support named pipes
+  ([.underline]#FIFOs#) or the */dev/fd* method of naming open files.
+
+'''
+
+* When available, process substitution is performed simultaneously with
+  parameter and variable expansion, command substitution, and arithmetic
+  expansion.
+
+=== Pathname Expansion
+
+* After word splitting, unless the `*-f*` option has been set, *bash* scans each
+  word for the characters `***`, `*?*`, and `*[*`.
+* If one of these characters appears, and is not quoted, then the word is
+  regarded as a [.underline]#pattern#, and replaced with an alphabetically
+  sorted list of filenames matching the pattern (see *Pattern Matching* below).
+* If no matching filenames are found, and the shell option `*nullglob*` is not
+  enabled, the word is left unchanged.
+* When a pattern is used for pathname expansion, the character *''.''* at the
+  start of a name or immediately following a slash must be matched explicitly,
+  unless the shell option `*dotglob*` is set.
+* In order to match the filenames *''.'' * and *''..''*, the pattern must begin
+  with ''.'' (for example, ''.?''), even if `*dotglob*` is set.
+* If the `*globskipdots*` shell option is enabled, the filenames *''.''* and
+  *''..''* are never matched, even if the pattern begins with a *''.''*.
+* When not matching pathnames, the *''.''* character is not treated specially.
+* When matching a pathname, the slash character must always be matched
+  explicitly by a slash in the pattern, but in other matching contexts it can be
+  matched by a special pattern character as described below under *Pattern
+  Matching*.
+* See the description of `*shopt*` below under *Shell Builtin Commands* for a
+  description of the `*nullglob*`, `*globskipdots*`,  and `*dotglob*` shell
+  options.
+
+==== Pattern Matching
+
+* Any character that appears in a pattern, other than the special pattern
+  characters described below, matches itself.
+* The NUL character may not occur in a pattern.
+* A backslash escapes the following character; the escaping backslash is
+  discarded when matching.
+* The special pattern characters must be quoted if they are to be matched
+  literally.
+
+'''
+
+* The special pattern characters have the following meanings:
+
+`***`::
+** Matches any string, including the null string.
+** If followed by a `*/*`, two adjacent `***`s will match only directories and
+   subdirectories.
+
+`*?*`::
+** Matches any single character.
+
+`*[\...]*`::
+** Matches any one of the enclosed characters.
+** A pair of characters separated by a hyphen denotes a [.underline]#range#
+   [.underline]#expression#; any character that falls between those two
+  characters, inclusive, using the current locale's collating sequence and
+  character set, is matched.
+** If the first character following the `*[*` is a `*!*` or a `*^*` then any
+   character not enclosed is matched.
+** The sorting order of characters in range expressions, and the characters
+   included in the range, are determined by the current locale and the values of
+   the `*LC_COLLATE*` or `*LC_ALL*` shell variables, if set.
+** To obtain the traditional interpretation of range expressions, where `*[a-d]*`
+   is equivalent to `*[abcd]*`, set value of the `*LC_ALL*` shell variable to
+   *C*, or enable the `*globasciiranges*` shell option.
+** A `*-*` may be matched by including it as the first or last character in the
+   set.
+** A `*]*` may be matched by including it as the first character in the set.
++
+'''
+
+** Within `*[*` and `*]*`, [.underline]#character# [.underline]#classes# can be
+  specified using the syntax `*+[:+*[.underline]#class#*:]*`, where
+  `[.underline]#class#` is one of the following classes defined in the POSIX
+  standard:
++
+`*alnum* *alpha* *ascii* *blank* *cntrl* *digit* *graph* *lower* *print* *punct*
+*space* *upper* *word* *xdigit*`
+
+** A character class matches any character belonging to that class.
+** The *word* character class matches letters, digits, and the character _.
+
+* If the `*extglob*` shell option is enabled using the `*shopt*` builtin, the
+  shell recognizes several extended pattern matching operators.
+* In the following description, a `[.underline]#pattern-list#` is a list of one
+  or more patterns separated by a `*|*`.
+* Composite patterns may be formed using one or more of the following
+  sub-patterns:
+
+`*?(*[.underline]#pattern-list#*)*`::
+** Matches zero or one occurrence of the given patterns
+`**(*[.underline]#pattern-list#*)*`::
+** Matches zero or more occurrences of the given patterns
+`*+(*[.underline]#pattern-list#*)*`::
+** Matches one or more occurrences of the given patterns
+`*@(*[.underline]#pattern-list#*)*`::
+** Matches one of the given patterns
+`*!(*[.underline]#pattern-list#*)*`::
+** Matches anything except one of the given patterns
+
+* The `*extglob*` option changes the behavior of the parser, since the
+  parentheses are normally treated as operators with syntactic meaning.
+* To ensure that extended matching patterns are parsed correctly, make sure that
+  `*extglob*` is enabled before parsing constructs containing the patterns,
+  including shell functions and command substitutions.
+
+'''
+
+* Complicated extended pattern matching against long strings is slow, especially
+  when the patterns contain alternations and the strings contain multiple
+  matches.
+* Using separate matches against shorter strings, or using arrays of strings
+  instead of a single long string, may be faster.
+
+=== Quote Removal
+
+* After the preceding expansions, all unquoted occurrences of the characters
+  `*\*`, `*'*`, and `*"*` that did not result from one of the above expansions
+  are removed.
+
+== Redirection
+
+* Before a command is executed, its input and output may be
+  [.underline]#redirected# using a special notation interpreted by the shell.
+* [.underline]#Redirection# allows commands' file handles to be duplicated,
+  opened, closed, made to refer to different files, and can change the files the
+  command reads from and writes to.
+* Redirection may also be used to modify file handles in the current shell
+  execution environment.
+* The following redirection operators may precede or appear anywhere within a
+  [.underline]#simple# [.underline]#command# or may follow a
+  [.underline]#command#.
+* Redirections are processed in the order they appear, from left to right.
+
+'''
+
+* Each redirection that may be preceded by a file descriptor number may instead
+  be preceded by a word of the form `{[.underline]#varname#}`.
+* In this case, for each redirection operator except `>&-` and `<&-`, the shell
+  will allocate a file descriptor greater than or equal to 10 and assign it to
+  `[.underline]#varname#`.
+* If `>&-` or `<&-` is preceded by `{[.underline]#varname#}`, the value of
+  `[.underline]#varname#` defines the file descriptor to close.
+* If `{[.underline]#varname#}` is supplied, the redirection persists beyond the
+  scope of the command, allowing the shell programmer to manage the file
+  descriptor's lifetime manually.
+* The `*varredir_close*` shell option manages this behavior.
+
+'''
+
+* In the following descriptions, if the file descriptor number is omitted, and
+  the first character of the redirection operator is `*<*`, the redirection
+  refers to the standard input (file descriptor 0).
+* If the first character of the redirection operator is `*>*`, the redirection
+  refers to the standard output (file descriptor 1).
+
+'''
+
+* The word following the redirection operator in the following descriptions,
+  unless otherwise noted, is subjected to brace expansion, tilde expansion,
+  parameter and variable expansion, command substitution, arithmetic expansion,
+  quote removal, pathname expansion, and word splitting.
+* If it expands to more than one word, *bash* reports an error.
+
+'''
+
+* Note that the order of redirections is significant.
+* For example, the command
++
+`ls *>* dirlist 2**>&**1`
+
+** directs both standard output and standard error to the file
+   `[.underline]#dirlist#`, while the command
++
+`ls 2**>&**1 *>* dirlist`
+
+** directs only the standard output to file `[.underline]#dirlist#`, because the
+   standard error was duplicated from the standard output before the standard
+   output was redirected to `[.underline]#dirlist#`.
+
+'''
+
+* *Bash* handles several filenames specially when they are used in redirections,
+  as described in the following table.
+* If the operating system on which *bash* is running provides these special
+  files, bash will use them; otherwise it will emulate them internally with the
+  behavior described below.
+
+`*/dev/fd/*[.underline]#fd#`::
+** If [.underline]#fd# is a valid integer, file descriptor `[.underline]#fd#` is
+   duplicated.
+`*/dev/stdin*`::
+** File descriptor 0 is duplicated.
+`*/dev/stdout*`::
+** File descriptor 1 is duplicated.
+`*/dev/stderr*`::
+** File descriptor 2 is duplicated.
+`*/dev/tcp/*[.underline]#host#/[.underline]#port#`::
+** If `[.underline]#host#` is a valid hostname or Internet address, and
+   `[.underline]#port#` is an integer port number or service name, *bash*
+   attempts to open the corresponding TCP socket.
+`*/dev/udp/*[.underline]#host#/[.underline]#port#`::
+** If `[.underline]#host#` is a valid hostname or Internet address, and
+   `[.underline]#port#` is an integer port number or service name, *bash*
+   attempts to open the corresponding UDP socket.
+
+'''
+
+* A failure to open or create a file causes the redirection to fail.
+
+'''
+
+* Redirections using file descriptors greater than 9 should be used with care,
+  as they may conflict with file descriptors the shell uses internally.
+
+=== Redirecting Input
+
+* Redirection of input causes the file whose name results from the expansion of
+  [.underline]#word# to be opened for reading on file descriptor
+  [.underline]#n#, or the standard input (file descriptor 0) if [.underline]#n#
+  is not specified.
+
+'''
+
+* The general format for redirecting input is:
++
+`+[+[.underline]#n#]*<*[.underline]#word#`
+
+=== Redirecting Output
+
+* Redirection of output causes the file whose name results from the expansion of
+  [.underline]#word# to be opened for writing on file descriptor
+  [.underline]#n#, or the standard output (file descriptor 1) if [.underline]#n#
+  is not specified.
+* If the file does not exist it is created; if it does exist it is truncated to
+  zero size.
+
+'''
+
+* The general format for redirecting output is:
++
+`+[+[.underline]#n#]*>*[.underline]#word#`
+
+* If the redirection operator is `*>|*`, or the redirection operator is `*>*`
+  and the `*noclobber*` option to the `*set*` builtin command is not enabled,
+  the redirection is attempted even if the file named by `[.underline]#word#`
+  exists.
+
+=== Appending Redirected Output
+
+* Redirection of output in this fashion causes the file whose name results from
+  the expansion of [.underline]#word# to be opened for appending on file
+  descriptor [.underline]#n#, or the standard output (file descriptor 1) if
+  [.underline]#n# is not specified.
+* If the file does not exist it is created.
+
+'''
+
+* The general format for appending output is:
++
+`+[+[.underline]#n#]*>>*[.underline]#word#`
+
+=== Redirecting Standard Output and Standard Error
+
+* This construct allows both the standard output (file descriptor 1) and the
+  standard error output (file descriptor 2) to be redirected to the file whose
+  name is the expansion of [.underline]#word#.
+
+'''
+
+* There are two formats for redirecting standard output and standard error:
++
+`*&>*[.underline]#word#`
+
+** and
++
+`*>&*[.underline]#word#`
+
+* Of the two forms, the first is preferred.
+* This is semantically equivalent to
++
+`*>*[.underline]#word# 2**>&**1`
+
+* When using the second form, `[.underline]#word#` may not expand to a number or
+  *-*.
+* If it does, other redirection operators apply (see *Duplicating File
+  Descriptors* below) for compatibility reasons.
+
+=== Appending Standard Output and Standard Error
+
+* This construct allows both the standard output (file descriptor 1) and the
+  standard error output (file descriptor 2) to be appended to the file whose
+  name is the expansion of [.underline]#word#.
+
+'''
+
+* The format for appending standard output and standard error is:
++
+`*&>>*[.underline]#word#`
+
+* This is semantically equivalent to
++
+`*>>*[.underline]#word# 2**>&**1`
+
+** see *Duplicating File Descriptors* below.
+
+=== Duplicating File Descriptors
+
+* The redirection operator
++
+`+[+[.underline]#n#]**<&**[.underline]#word#`
+
+** is used to duplicate input file descriptors.
+* If `[.underline]#word#` expands to one or more digits, the file descriptor
+  denoted by `[.underline]#n#` is made to be a copy of that file descriptor.
+* If the digits in word do not specify a file descriptor open for input, a
+  redirection error occurs.
+* If `[.underline]#word#` evaluates to `*-*`, file descriptor `[.underline]#n#`
+  is closed.
+* If `[.underline]#n#` is not specified, the standard input (file descriptor 0)
+  is used.
+
+'''
+
+* The operator
++
+`+[+[.underline]#n#]**>&**[.underline]#word#`
+
+** is used similarly to duplicate output file descriptors.
+* If `[.underline]#n#` is not specified, the standard output (file descriptor 1)
+  is used.
+* If the digits in `[.underline]#word#` do not specify a file descriptor open
+  for output, a redirection error occurs.
+* If `[.underline]#word#` evaluates to `*-*`, file descriptor `[.underline]#n#`
+  is closed.
+* As a special case, if `[.underline]#n#` is omitted, and `[.underline]#word#`
+  does not expand to one or more digits or `*-*`, the standard output and
+  standard error are redirected as described previously.
+
+== Arithmetic Evaluation
+
+* The shell allows arithmetic expressions to be evaluated, under certain
+  circumstances (see the `*let*` and `*declare*` builtin commands, the `*((*`
+  compound command, and *Arithmetic Expansion*).
+* Evaluation is done in fixed-width integers with no check for overflow, though
+  division by 0 is trapped and flagged as an error.
+* The operators and their precedence, associativity, and values are the same as
+  in the C language.
+* The following list of operators is grouped into levels of equal-precedence
+  operators.
+* The levels are listed in order of decreasing precedence.
+
+[%autowidth]
+|===
+|Operator	|Description
+
+|`[.underline]#id#*++*` `[.underline]#id#*--*`
+|variable post-increment and post-decrement
+
+|`*-*` `*+*`	|unary minus and plus
+
+|`*++*[.underline]#id#` `*--*[.underline]#id#`
+|variable pre-increment and pre-decrement
+
+|`*!*` `*~*`	|logical and bitwise negation
+|`*+**+*`	|exponentiation
+
+|`***` `*/*` `*%*`
+|multiplication, division, remainder
+
+|`*+*` `*-*`	|addition, subtraction
+|`*<<*` `*>>*`	|left and right bitwise shifts
+
+|`*<=*` `*>=*` `*<*` `*>*`
+|comparison
+
+|`*==*` `*!=*`	|equality and inequality
+|`*&*`		|bitwise AND
+|`*^*`		|bitwise exclusive OR
+|`*\|*`		|bitwise OR
+|`*&&*`		|logical AND
+|`*\|\|*`	|logical OR
+
+|`[.underline]#expr#*?*[.underline]#expr#*:*[.underline]#expr#`
+|conditional operator
+
+|`*=*` `**=*` `*/=*` `*%=*` `*+=*` `*-=*` `*<\<=*` `*>>=*` `*&=*` `*^=*` `*\|=*`
+|assignment
+
+|`[.underline]#expr1# *,* [.underline]#expr2#`
+|comma
+|===
+
+* Shell variables are allowed as operands; parameter expansion is performed
+  before the expression is evaluated.
+* Within an expression, shell variables may also be referenced by name without
+  using the parameter expansion syntax.
+* A shell variable that is null or unset evaluates to 0 when referenced by name
+  without using the parameter expansion syntax.
+* The value of a variable is evaluated as an arithmetic expression when it is
+  referenced, or when a variable which has been given the [.underline]#integer#
+  attribute using `*declare -i*` is assigned a value.
+* A null value evaluates to 0.
+* A shell variable need not have its [.underline]#integer# attribute turned on
+  to be used in an expression.
+
+'''
+
+* Integer constants follow the C language definition, without suffixes or
+  character constants.
+* Constants with a leading `0` are interpreted as octal numbers.
+* A leading `0x` or `0X` denotes hexadecimal.
+* Otherwise, numbers take the form `+[+[.underline]#base##]n`, where the optional
+  `[.underline]#base#` is a decimal number between 2 and 64 representing the
+  arithmetic base, and `[.underline]#n#` is a number in that base.
+* If `[.underline]#base##` is omitted, then base 10 is used.
+* When specifying `[.underline]#n#`, if a non-digit is required, the digits
+  greater than 9 are represented by the lowercase letters, the uppercase
+  letters, `@`, and `_`, in that order.
+* If `[.underline]#base#` is less than or equal to 36, lowercase and uppercase
+  letters may be used interchangeably to represent numbers between 10 and 35.
+* Operators are evaluated in order of precedence.
+* Sub-expressions in parentheses are evaluated first and may override the
+  precedence rules above.
+
+== Conditional Expressions
+
+* Conditional expressions are used by the `*[[*` compound command and the
+  `*test*` and `*[*` builtin commands to test file attributes and perform string
+  and arithmetic comparisons.
+* The `*test*` and `*[*` commands determine their behavior based on the number
+  of arguments; see the descriptions of those commands for any other
+  command-specific actions.
+
+'''
+
+* Expressions are formed from the following unary or binary primaries.
+* *Bash* handles several filenames specially when they are used in expressions.
+* If the operating system on which *bash* is running provides these special
+  files, bash will use them;  otherwise it will emulate them internally with
+  this behavior: If any [.underline]#file# argument to one of the primaries is of
+  the form `[.underline]#/dev/fd/n#`, then file descriptor `[.underline]#n#` is
+  checked.
+* If the [.underline]#file# argument to one of the primaries is one of
+  `[.underline]#/dev/stdin#`, `[.underline]#/dev/stdout#`, or
+  `[.underline]#/dev/stderr#`, file descriptor 0, 1, or 2, respectively, is
+  checked.
+
+'''
+
+* Unless otherwise specified, primaries that operate on files follow symbolic
+  links and operate on the target of the link, rather than the link itself.
+
+'''
+
+* When used with `*[[*`, the `*<*` and `*>*` operators sort lexicographically
+  using the current locale.
+* The `*test*` command sorts using ASCII ordering.
+
+'''
+
+`*-a* [.underline]#file#`::
+* True if `[.underline]#file#` exists.
+`*-d* [.underline]#file#`::
+* True if `[.underline]#file#` exists and is a directory.
+`*-e* [.underline]#file#`::
+* True if `[.underline]#file#` exists.
+`*-f* `[.underline]#file#`::
+* True if `[.underline]#file#` exists and is a regular file.
+`*-r* [.underline]#file#`::
+* True if `[.underline]#file#` exists and is readable.
+`[.underline]#string#`::
+* True if the length of `[.underline]#string#` is non-zero.
+`[.underline]#string1# *==* [.underline]#string2#`::
+`[.underline]#string1# *=* [.underline]#string2#`::
+* True if the strings are equal.
+* `*=*` should be used with the `*test*` command for POSIX conformance.
+* When used with the `*[[*` command, this performs pattern matching as described
+  above (*Compound Commands*).
+`[.underline]#string1# *!=* [.underline]#string2#`::
+* True if the strings are not equal.
+`[.underline]#arg1# *OP* [.underline]#arg2#`::
+* `*OP*` is one of `*-eq*`, `*-ne*`, `*-lt*`, `*-le*`, `*-gt*`, or `*-ge*`.
+* These arithmetic binary operators return true if `[.underline]#arg1#` is equal
+  to, not equal to, less than, less than or equal to, greater than, or greater
+  than or equal to `[.underline]#arg2#`, respectively.
+* `[.underline]#Arg1#` and `[.underline]#arg2#` may be positive or negative
+  integers.
+* When used with the `*+[[+*` command, `[.underline]#Arg1#` and
+  `[.underline]#Arg2#` are evaluated as arithmetic expressions (see *Arithmetic
+  Evaluation* above).
+
+== Command Execution
+
+* If the program is a file beginning with `*#!*`, the remainder of the first line
+  specifies an interpreter for the program.
+* The shell executes the specified interpreter on operating systems that do not
+  handle this executable format themselves.
+* The arguments to the interpreter consist of a single optional argument
+  following the interpreter name on the first line of the program, followed by
+  the name of the program, followed by the command arguments, if any.
+
+== Environment
+
+* When a program is invoked it is given an array of strings called the
+  [.underline]#environment#.
+* This is a list of [.underline]#name#-[.underline]#value# pairs, of the form
+  [.underline]#name#=[.underline]#value#.
+
+'''
+
+* The shell provides several ways to manipulate the environment.
+* On invocation, the shell scans its own environment and creates a parameter for
+  each name found, automatically marking it for [.underline]#export# to child
+  processes.
+* Executed commands inherit the environment.
+* The `*export*` and `*declare -x*` commands allow parameters and functions to
+  be added to and deleted from the environment.
+* If the value of a parameter in the environment is modified, the new value
+  becomes part of the environment, replacing the old.
+
+== Exit Status
+
+* The exit status of an executed command is the value returned by the
+  `[.underline]#waitpid#` system call or equivalent function.
+* Exit statuses fall between 0 and 255, though, as explained below, the shell
+  may use values above 125 specially.
+* Exit statuses from shell builtins and compound commands are also limited to
+  this range.
+* Under certain circumstances, the shell will use special values to indicate
+  specific failure modes.
+
+'''
+
+* For the shell's purposes, a command which exits with a zero exit status has
+  succeeded.
+* An exit status of zero indicates success.
+* A non-zero exit status indicates failure.
+* When a command terminates on a fatal signal [.underline]#N#, *bash* uses the
+  value of 128+[.underline]#N# as the exit status.
+
+'''
+
+* If a command is not found, the child process created to execute it returns a
+  status of 127.
+* If a command is found but is not executable, the return status is 126.
+
+'''
+
+* If a command fails because of an error during expansion or redirection, the
+  exit status is greater than zero.
+
+'''
+
+* Shell builtin commands return a status of 0 ([.underline]#true#) if
+  successful, and non-zero ([.underline]#false#) if an error occurs while they
+  execute.
+* All builtins return an exit status of 2 to indicate incorrect usage, generally
+  invalid options or missing arguments.
+
+'''
+
+* The exit status of the last command is available in the special parameter
+  `$?`.
+
+'''
+
+* *Bash* itself returns the exit status of the last command executed, unless a
+  syntax error occurs, in which case it exits with a non-zero value.
+* See also the `*exit*` builtin command below.
+
+== Job Control
+
+* [.underline]#Job# [.underline]#control# refers to the ability to selectively
+  stop ([.underline]#suspend#) the execution of processes and continue
+  ([.underline]#resume#) their execution at a later point.
+* A user typically employs this facility via an interactive interface supplied
+  jointly by the operating system kernel's terminal driver and *bash*.
+
+'''
+
+* The shell associates a [.underline]#job# with each pipeline.
+* It keeps a table of currently executing jobs, which may be listed with the
+  `*jobs*` command.
+* When *bash* starts a job asynchronously (in the background), it prints a line
+  that looks like:
++
+....
+       [1] 25647
+....
+
+** indicating that this job is job number 1 and that the process ID of the last
+   process in the pipeline associated with this job is 25647.
+* All of the processes in a single pipeline are members of the same job.
+* *Bash* uses the job abstraction as the basis for job control.
+
+'''
+
+* To facilitate the implementation of the user interface to job control, the
+  operating system maintains the notion of a [.underline]#current terminal
+  process group ID#.
+* Members of this process group (processes whose process group ID is equal to
+  the current terminal process group ID) receive keyboard-generated signals such
+  as `*SIGINT*`.
+* These processes are said to be in the [.underline]#foreground#.
+* [.underline]#Background# processes are those whose process group ID differs
+  from the terminal's; such processes are immune to keyboard-generated signals.
+* Only foreground processes are allowed to read from or, if the user so
+  specifies with stty tostop, write to the terminal.
+* Background processes which attempt to read from (write to when stty tostop is
+  in effect) the terminal are sent a `*SIGTTIN*` (`*SIGTTOU*`) signal by the
+  kernel's terminal driver, which, unless caught, suspends the process.
+
+'''
+
+* If the operating system on which *bash* is running supports job control,
+  *bash* contains facilities to use it.
+* Typing the [.underline]#suspend# character (typically kbd:[*^Z*],
+  kbd:[Control-Z]) while a process is running causes that process to be stopped
+  and returns control to *bash*.
+* The user may then manipulate the state of this job, using the `*bg*` command
+  to continue it in the background, the `*fg*` command to continue it in the
+  foreground, or the `*kill*` command to kill it.
+* A kbd:[*^Z*] takes effect immediately, and has the additional side effect of
+  causing pending output and typeahead to be discarded.
+
+'''
+
+* There are a number of ways to refer to a job in the shell.
+* The character % introduces a job specification ([.underline]#jobspec#).
+* Job number [.underline]#n# may be referred to as *%n*.
+* A job may also be referred to using a prefix of the name used to start it, or
+  using a substring that appears in its command line.
+* For example, `*%ce*` refers to a stopped job whose command name begins with
+  *ce*.
+* If a prefix matches more than one job, bash reports an error.
+* Using %?ce, on the other hand, refers to any job containing the string ce in
+  its command line.
+* If the substring matches more than one job, *bash* reports an error.
+* The symbols `*%%*` and `*%+*` refer to the shell's notion of the
+  [.underline]#current job#, which is the last job stopped while it was in the
+  foreground or started in the background.
+* The previous job may be referenced using `*%-*`.
+* If there is only a single job, `*%+*` and `*%-` can both be used to refer to
+  that
+  job.
+* In output pertaining to jobs (e.g., the output of the `*jobs*` command), the
+  current job is always flagged with a *+*, and the previous job with a *-*.
+* A single % (with no accompanying job specification) also refers to the current
+  job.
+
+'''
+
+* Simply naming a job can be used to bring it into the foreground: `*%1*` is a
+  synonym for *‘‘fg %1''*, bringing job 1 from the background into the
+  foreground.
+* Similarly, *‘‘%1 &''* resumes job 1 in the background, equivalent to *‘‘bg
+  %1''*.
+
+'''
+
+* The shell learns immediately whenever a job changes state.
+* Normally, *bash* waits until it is about to print a prompt before reporting
+  changes in a job's status so as to not interrupt any other output.
+
+'''
+
+* If an attempt to exit *bash* is made while jobs are stopped, the shell prints
+  a warning message, and, if the `*checkjobs*` option is enabled, lists the jobs
+  and their statuses.
+* The `*jobs*` command may then be used to inspect their status.
+* If a second attempt to exit is made without an intervening command, the shell
+  does not print another warning, and any stopped jobs are terminated.
+
+== Files
+
+[.underline]#/bin/bash#::
+* The *bash* executable
+[.underline]#/etc/profile#::
+* The systemwide initialization file, executed for login shells
+[.underline]#~/.bash_profile#::
+* The personal initialization file, executed for login shells
+[.underline]#~/.bashrc#::
+* The individual per-interactive-shell startup file
+[.underline]#~/.bash_logout#::
+* The individual login shell cleanup file, executed when a login shell exits
+[.underline]#~/.bash_history#::
+* The default value of *HISTFILE*, the file in which bash saves the command
+  history
+[.underline]#~/.inputrc#::
+* Individual [.underline]#readline# initialization file
+
+== Bugs
+
+* It's too big and too slow.
+
+'''
+
+* There are some subtle differences between *bash* and traditional versions of
+  *sh*, mostly because of the *POSIX* specification.
+
+'''
+
+* Aliases are confusing in some uses.
+
+'''
+
+* Shell builtin commands and functions are not stoppable/restartable.
+
+'''
+
+* Compound commands and command sequences of the form 'a ; b ; c' are not
+  handled gracefully when process suspension is attempted.
+* When a process is stopped, the shell immediately executes the next command in
+  the sequence.
+* It suffices to place the sequence of commands between parentheses to force it
+  into a subshell, which may be stopped as a unit.
+
+'''
+
+* Array variables may not (yet) be exported.
+
+'''
+
+* There may be only one active coprocess at a time.
+
+[quote]
+|===
+|GNU Bash 5.2	|2022 September 19
+|===
