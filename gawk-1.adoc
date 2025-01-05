@@ -1,0 +1,190 @@
+= GAWK(1)
+:source-highlighter: rouge
+
+== Name
+
+* gawk -- pattern scanning and processing language
+
+== Synopsis
+
+`*gawk* [ POSIX or GNU style options ] -f [.underline]#program-file# [ -- ] file
+\...`
+
+`*gawk* [ POSIX or GNU style options ] [ -- ] [.underline]#program-text# file
+\...`
+
+== Description
+
+* [.underline]#Gawk# is the GNU Project's implementation of the AWK programming
+  language.
+* This version in turn is based on the description in [.underline]#The AWK Programming
+  Language#, by Aho, Kernighan, and Weinberger.
+* [.underline]#Gawk# provides the additional features found in the current version of Brian
+  Kernighan's [.underline]#awk# and numerous GNU-specific extensions.
+
+'''
+
+* The command line consists of options to [.underline]#gawk# itself, the AWK
+  program text (if not supplied via the `*-f*` or `*--include*` options), and
+  values to be made available in the `*ARGC*` and `*ARGV*` pre-defined AWK
+  variables.
+
+== Preface
+
+* This manual page is intentionally as terse as possible.
+* Full details are provided in [.underline]#GAWK: Effective AWK Programming#,
+  and you should look there for the full story on any specific feature.
+* Where possible, links to the online version of the manual are provided.
+
+== AWK Program Execution
+
+* An AWK program consists of a sequence of optional directives, pattern-action
+  statements, and optional function definitions.
++
+`**@include "**[.underline]#filename#**"**`
++
+`**@load "**[.underline]#filename#**"**`
++
+`**@namespace "**[.underline]#name#**"**`
++
+`[.underline]#pattern# *{* [.underline]#action statements# *}*`
++
+`*function* [.underline]#name#**(**[.underline]#parameter list#*)* *{*
+[.underline]#statements# *}*`
+
+* [.underline]#Gawk# first reads the program source from the
+  [.underline]#program-file#(s) if specified, from arguments to
+  `*--source*`, or from the first non-option argument on the command line.
+
+* [.underline]#Gawk# executes AWK programs in the following order.
+* Next, [.underline]#gawk# compiles the program into an internal form.
+
+'''
+
+* For each record in the input, [.underline]#gawk# tests to see if it matches
+  any [.underline]#pattern# in the AWK program.
+* For each pattern that the record matches, gawk executes the associated
+  [.underline]#action#.
+* The patterns are tested in the order they occur in the program.
+
+== Variables, Records And Fields
+
+* AWK variables are dynamic; they come into existence when they are first used.
+* Their values are either floating-point numbers or strings, or both, depending upon how they are used.
+* Additionally, gawk allows variables to have regular-expression type.
+* AWK also has one dimensional arrays; arrays with multiple dimensions may be simulated.
+* However, gawk provides true arrays of arrays.
+* Several pre-defined variables are set as a program runs; these are described
+  as needed and summarized below.
+
+=== Records
+
+* Normally, records are separated by newline characters.
+* You can control how records are separated by assigning values to the built-in
+  variable `*RS*`.
+
+=== Fields
+
+* As each input record is read, [.underline]#gawk# splits the record into
+  [.underline]#fields#, using the value of the `*FS*` variable as the field separator.
+
+'''
+
+* Each field in the input record may be referenced by its position: `*$1*`,
+  `*$2*`, and so on.
+* `*$0*` is the whole record, including leading and trailing whitespace.
+
+=== Built-in Variables
+
+`*FS*`::
+* The input field separator, a space by default.
+
+=== Regexp Constants
+
+* A regular expression constant is a sequence of characters enclosed between
+  forward slashes (like `*/value/*`).
+
+'''
+
+* The escape sequences described in the manual may also be used inside constant
+  regular expressions (e.g., `*/[ \t\f\n\r\v]/*` matches whitespace characters).
+
+'''
+
+* [.underline]#Gawk# provides [.underline]#strongly typed# regular expression
+  constants.
+* These are written with a leading *@* symbol (like so: `*@/value/*`).
+* Such constants may be assigned to scalars (variables, array elements) and
+  passed to user-defined functions.
+* Variables that have been so assigned have regular expression type.
+
+== Patterns And Actions
+
+* AWK is line-oriented language.
+* The pattern comes first, and then the action.
+* Action statements are enclosed in `*{*` and `*}*`.
+* Either the pattern may be missing, or the action may be missing.
+* If the pattern is missing, the action executes for every single record of
+  input.
+
+'''
+
+* Comments begin with the `*#*` character, and continue until the end of the
+  line.
+* Empty lines may be used to separate statements.
+* Normally, a statement ends with a newline, however, this is not the case for
+  lines ending in a comma, `*{*`, `*?*`, `*:*`, `*&&*`, or `*||*`.
+* Lines ending in `*do*` or `*else*` also have their statements automatically
+  continued on the following line.
+* In other cases, a line can be continued by ending it with a "\", in which case
+  the newline is ignored.
+* However, a "\" after a `*#*` is not special.
+
+'''
+
+* Multiple statements may be put on one line by separating them with a "*;*". 
+* This applies to both the statements within the action part of a pattern-action
+  pair (the usual case), and to the pattern-action statements themselves.
+
+=== Patterns
+
+* AWK patterns may be one of the following:
++
+`*/*[.underline]#regular expression#*/*`
++
+`[.underline]#pattern# *&&* [.underline]#pattern#`
++
+`[.underline]#pattern# *||* [.underline]#pattern#`
++
+`*(*[.underline]#pattern#*)*`
++
+`*!* [.underline]#pattern#`
+
+* For `*/*[.underline]#regular expression#*/*` patterns, the associated
+  statement is executed for each input record that matches the regular
+  expression.
+* Regular expressions are essentially the same as those in
+  [.underline]#egrep#(1).
+
+'''
+
+* The `*&&*`, `*||*`, and `*!*` operators are logical AND, logical OR, and
+  logical NOT, respectively, as in C.
+* They do short-circuit evaluation, also as in C, and are used for combining
+  more primitive pattern expressions.
+* As in most languages, parentheses may be used to change the order of
+  evaluation.
+
+=== Actions
+
+* Action statements are enclosed in braces, `*{*` and `*}*`.
+* Action statements consist of the usual assignment, conditional, and looping
+  statements found in most languages.
+* The operators, control statements, and input/output statements available are patterned after those in C.
+
+=== I/O Statements
+
+* The input/output statements are as follows:
+
+`*print*`::
+** Print the current record.
