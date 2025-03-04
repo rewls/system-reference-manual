@@ -1,0 +1,114 @@
+= limits.h(7POSIX)
+
+== Name
+
+* limits.h -- implementation-defined constants
+
+== Synopsis
+
+[source,c]
+#include <limits.h>
+
+== Description
+
+* Some of the functionality described on this reference page extends the ISO C
+  standard.
+* Applications shall define the appropriate feature test macro (see the System
+  Interfaces volume of POSIX.1‐2017, [.underline]#Section 2.2, The Compilation
+  Environment#)
+  to enable the visibility of these symbols in this header.
+
+'''
+
+* Many of the symbols listed here are not defined by the ISO/IEC 9899:1999
+  standard.
+* Such symbols are not shown as CX shaded, except under the heading Numerical
+  Limits.
+
+'''
+
+* The [.underline]#<limits.h># header shall define macros and symbolic
+  constants for various limits.
+* Different categories of limits are described below, representing various
+  limits on resources that the implementation imposes on applications.
+* All macros and symbolic constants defined in this header shall be suitable
+  for use in *#if* preprocessing directives.
+
+'''
+
+* Implementations may choose any appropriate value for each limit, provided it
+  is not more restrictive than the Minimum Acceptable Values listed below.
+* Symbolic constant names beginning with _POSIX may be found in
+  [.underline]#<unistd.h>#.
+
+'''
+
+* Applications should not assume any particular value for a limit.
+* To achieve maximum portability, an application should not require more
+  resource than the Minimum Acceptable Value quantity.
+* However, an application wishing to avail itself of the full amount of a
+  resource available on an implementation may make use of the value given in
+  [.underlin]#<limits.h># on that particular implementation, by using the macros and
+  symbolic constants listed below.
+* It should be noted, however, that many of the listed limits are not
+  invariant, and at runtime, the value of the limit may differ from those
+  given in this header, for the following reasons:
+** The limit is pathname-dependent.
+** The limit differs between the compile and runtime machines.
+
+* For these reasons, an application may use the [.underline]#fpathconf#(),
+  [.underline]#pathconf#(), and [.underline]#sysconf#() functions to determine
+  the actual value of a limit at runtime.
+
+'''
+
+* The items in the list ending in _MIN give the most negative values that the
+  mathematical types are guaranteed to be capable of representing.
+* Numbers of a more negative value may be supported on some implementations,
+  as indicated by the [.underline]#<limits.h># header on the implementation,
+  but applications  requiring such numbers are not guaranteed to be portable
+  to all implementations.
+* For positive constants ending in _MIN, this indicates the minimum acceptable
+  value.
+
+=== Runtime Invariant Values (Possibly Indeterminate)
+
+* A definition of one of the symbolic constants in the following list shall be
+  omitted from [.underline]#<limits.h># on specific implementations where the
+  corresponding value is equal to or greater than the stated minimum, but is
+  unspecified.
+
+'''
+
+* This indetermination might depend on the amount of available memory space on
+  a specific instance of a specific implementation.
+* The actual value supported by a specific instance shall be provided by the
+  `sysconf()` function.
+
+'''
+
+{OPEN_MAX}::
+* A value one greater than the maximum value that the system may assign to a
+  newly-created file descriptor.
+* Minimum Acceptable Value: {_POSIX_OPEN_MAX}
+
+=== Minimum Values
+
+* The [.underline]#<limits.h># header shall define the following symbolic
+  constants with the values shown.
+* These are the most restrictive values for certain features on an
+  implementation conforming to this volume of POSIX.1‐2017.
+* Related symbolic constants are defined elsewhere in this volume of
+  POSIX.1‐2017 which reflect the actual implementation and which need not be
+  as restrictive.
+* For each of these limits, a conforming implementation shall provide a value
+  at least this large or shall have no limit.
+* A strictly conforming application must not require a larger value for
+  correct operation.
+
+'''
+
+{_POSIX_OPEN_MAX}::
+* A value one greater than the maximum value that the system may assign to a
+  newly-created file descriptor.
+* Value: 20
