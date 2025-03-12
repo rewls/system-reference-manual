@@ -1,0 +1,54 @@
+= FEATURE_TEST_MACROS(7)
+
+== Name
+
+* feature_test_macros - feature test macros
+
+== Description
+
+* Feature test macros allow the programmer to control the definitions that are
+  exposed by system header files when a program is compiled.
+
+[NOTE]
+====
+* In order to be effective, a feature test macro [.underline]#must be defined
+  before including any header files#.
+* This can be done either in the compilation command ([.underline]#cc
+  -DMACRO=value#) or by defining the macro within the source code before
+  including any headers.
+* The requirement that the macro must be defined before including any header
+  file exists because header files may freely include one another.
+* Thus, for example, in the following  lines, defining the *_GNU_SOURCE* macro
+  may have no effect because the header [.underline]#<abc.h># itself includes
+  [.underline]#<xyz.h># (POSIX explicitly allows this):
++
+[source,c]
+#include <abc.h>
+#define _GNU_SOURCE
+#include <xyz.h>
+
+* Some feature test macros are useful for creating portable applications, by
+  preventing nonstandard definitions from being exposed.
+* Other macros can be used to expose nonstandard definitions that are not
+  exposed by default.
+
+'''
+
+* The precise effects of each of the feature test macros described below can
+  be ascertained by inspecting the [.underline]#<features.h># header file.
+
+[NOTE]
+====
+* applications do [.underline]#not# need to directly include
+  [.underline]#<features.h>#; indeed, doing so is actively discouraged.
+* See NOTES.
+====
+
+=== Default definitions, implicit definitions, and combining definitions
+
+* If no feature test macros are explicitly defined, then the following feature
+  test macros are defined by default: *_BSD_SOURCE* (in glibc 2.19 and
+  earlier), *_SVID_SOURCE* (in glibc 2.19 and earlier), *_DEFAULT_SOURCE* (since
+  glibc 2.19), *_POSIX_SOURCE*, and *_POSIX_C_SOURCE*=200809L (200112L in glibc
+  versions before 2.10; 199506L in glibc versions before 2.4; 199309L in glibc
+  versions before 2.1).
