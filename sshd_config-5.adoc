@@ -1,0 +1,52 @@
+= SSHD_CONFIG(5)
+
+== Name
+
+* *sshd_config* -- OpenSSH daemon configuration file
+
+== Description
+
+* sshd(8) reads configuration data from [.underline]#/etc/ssh/sshd_config# (or
+  the file specified with *-f* on the command line).
+* The file contains keyword-argument pairs, one per line.
+* For each keyword, the first obtained value will be used.
+* Lines starting with '#' and empty lines are interpreted as comments.
+* Arguments may optionally be enclosed in double quotes (") in order to
+  represent arguments containing spaces.
+
+'''
+
+* The possible keywords and their meanings are as follows (note that keywords
+  are case-insensitive and arguments are case-sensitive):
+
+'''
+
+Port::
+* Specifies the port number that sshd(8) listens on.
+* The default is 22.
+* Multiple options of this type are permitted.
+* See also *ListenAddress*.
+
+PermitRootLogin::
+* Specifies whether root can log in using ssh(1).
+* The argument must be *yes*, *prohibit-password*, *forced-commands-only*, or
+  *no*.
+* The default is *prohibit-password*.
++
+'''
+
+* If this option is set to *prohibit-password* (or its deprecated alias,
+  *without-password*), password and keyboard-interactive authentication are
+  disabled for root.
++
+'''
+
+* If this option is set to *forced-commands-only*, root login with public key
+  authentication will be allowed, but only if the command option has been
+  specified (which may be useful for taking remote backups even if root login
+  is normally not allowed).
+* All other authentication methods are disabled for root.
++
+'''
+
+* If this option is set to *no*, root is not allowed to log in.
