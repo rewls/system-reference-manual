@@ -1,0 +1,31 @@
+= UFW:(8)
+
+== Name
+
+* ufw - program for managing a netfilter firewall
+
+== Description
+
+* This program is for managing a Linux firewall and aims to provide an easy to
+  use interface for the user.
+
+== Options
+
+`*enable*`::
+* reloads firewall and enables firewall on boot.
+
+`*allow* ARGS`::
+* add allow rule.
+* See *RULE SYNTAX*
+
+== Rule syntax
+
+* Users can specify rules using either a simple syntax or a full syntax.
+* The simple syntax only specifies the port and optionally the protocol to be
+  allowed or denied on the host.
+
+'''
+
+* Both syntaxes support specifying a comment for the rule.
+* For existing rules, specifying a different comment updates the comment and
+  specifying '' removes the comment.
