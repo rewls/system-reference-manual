@@ -1,0 +1,46 @@
+= IP(8)
+
+== Name
+
+* ip - show / manipulate routing, network devices, interfaces and tunnels
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*ip* {startsb} [.underline]#OPTIONS# ] [.underline]#OBJECT# { [.underline]#COMMAND# | *help* }
+
+[.underline]#OBJECT# := { *address* | *route* }
+....
+
+== IP - command syntax
+
+=== [.underlin]#OBJECT#
+
+address::
+* protocol (IP or IPv6) address on a device.
+
+route::
+* routing table entry.
+
+'''
+
+* The names of all objects may be written in full or abbreviated form, for
+  example *address* can be abbreviated as *addr* or just *a*.
+
+
+=== [.underline]#COMMAND#
+
+* Specifies the action to perform on the object.
+* The set of possible actions depends on the object type.
+* As a rule, it is possible to *add*, *delete* and *show* (or *list*) objects, but
+  some objects do not allow all of these operations or have some additional
+  commands.
+* The *help* command is available for all objects.
+* It prints out a list of available commands and argument syntax conventions.
+
+'''
+
+* If no command is given, some default command is assumed.
+* Usually it is *list* or, if the objects of this class cannot be listed,
+  *help*.
