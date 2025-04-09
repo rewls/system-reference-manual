@@ -18,6 +18,12 @@
 * add allow rule.
 * See *RULE SYNTAX*
 
+`*status*`::
+* show status of firewall and ufw managed rules.
+* Use *status verbose* for extra  information.
+* In the status output, 'Anywhere' is synonymous with 'any', 0.0.0.0/0 (IPv4)
+  and ::/0 (IPv6).
+
 == Rule syntax
 
 * Users can specify rules using either a simple syntax or a full syntax.
