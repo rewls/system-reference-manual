@@ -1,0 +1,79 @@
+= ADDUSER(8)
+
+* System Manager's Manual
+
+== Name
+
+* adduser, addgroup - add or manipulate users or groups
+
+== Description
+
+* *adduser* and *addgroup* add users and groups to the system according to
+  command line options and configuration information in
+  [.underline]#/etc/adduser.conf#.
+* They are friendlier front ends to the low level tools like *useradd*,
+  *groupadd* and *usermod* programs, by default choosing Debian policy
+  conformant UID and GID values, creating a home directory with skeletal
+  configuration, running a custom script, and other features.
+
+'''
+
+* *adduser* and *addgroup* are intended as a policy layer, making it easier
+  for package maintainers and local administrators to create local system
+  accounts in the way Debian expects them to  be created,  taking the burden
+  to adapt to the probably changing specifications of Debian policy.
+
+'''
+
+* adduser* honors the distinction between [.underline]#dynamically allocated
+  system users and groups# and [.underline]#dynamically allocated user
+  accounts# that is documented in Debian Policy, Chapter 9.2.2.
+
+'''
+
+* For a full list and explanations of all options, see the OPTIONS section.
+
+'''
+
+* *adduser* and *addgroup* can be run in one of five modes:
+
+=== Add a normal user
+
+* If called with one non-option argument and without the *--system* or
+  *--group*  options, *adduser* will add a normal user, that means a
+  [.underline]#dynamically allocated user account# in the sense of Debian
+  Policy.
+* This is commonly referred to in *adduser* as a [.underline]#non-system
+  user#.
+
+'''
+
+* By default, each user is given a corresponding group with the same name.
+* This is commonly called [.underline]#Usergroups# and allows group writable
+  directories to be easily maintained by placing the appropriate users in the
+  new group, setting the set-group-ID bit in the directory, and ensuring that
+  all users use a umask of 002.
+
+'''
+
+* *adduser* will copy files from [.underline]#/etc/skel# into the home
+  directory and prompt for the comment field and a password if those functions
+  have not been turned off / overridden from the command line.
+
+=== Add a group
+
+* If *adduser* is called with the *--group* option and without the *--system*
+  option, or *addgroup* is called respectively, a user group will be added.
+
+'''
+
+* The group is created with no members.
+
+=== Add an existing user to an existing group
+
+* If called with two non-option arguments, *adduser* will add an existing user
+  to an existing group.
+
+'''
+
+* Debian GNU/Linux
