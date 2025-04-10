@@ -1,0 +1,142 @@
+= PAM.CONF(5)
+
+* Linux-PAM Manual
+
+== Name
+
+* pam.conf, pam.d - PAM configuration files
+
+== Description
+
+* When a PAM aware privilege granting application is started, it activates its
+  attachment to the PAM-API.
+* This activation performs a number of tasks, the most important being the
+  reading of the configuration file(s): /etc/pam.conf.
+* Alternatively, this may be the contents of the /etc/pam.d/ directory.
+* The presence of this directory will cause Linux-PAM to ignore /etc/pam.conf.
+
+'''
+
+* These files list the PAMs that will do the authentication tasks required by
+  this service, and the appropriate behavior of the PAM-API in the event that
+  individual PAMs fail.
+
+'''
+
+* The syntax of the /etc/pam.conf configuration file is as follows.
+* The file is made up of a list of rules, each rule is typically placed on a
+  single line, but may be extended with an escaped end of line: '\<LF>'.
+* Comments are preceded with '#' marks and extend to the next end of line.
+
+'''
+
+* The format of each rule is a space separated collection of tokens, the first
+  three being case-insensitive:
++
+[subs=quotes]
+....
+*service type control module-path module-arguments*
+....
+
+
+* The syntax of files contained in the /etc/pam.d/ directory, are identical
+  except for the absence of any [.underline]#service# field.
+* In this case, the [.underline]#service# is the name of the file in the
+  /etc/pam.d/ directory.
+* This filename must be in lower case.
+
+'''
+
+* An important feature of [.underline]#PAM#, is that a number of rules may be
+  [.underline]#stacked# to combine the services of a number of PAMs for a
+  given authentication task.
+
+'''
+
+* The [.underline]#service# is typically the familiar name of the
+  corresponding application: [.underline]#login# and [.underline]#su# are good
+  examples.
+* The [.underline]#service#-name, [.underline]#other#, is reserved for giving
+  default rules.
+* Only lines that mention the current service (or in the absence of such, the
+  [.underline]#other# entries) will be associated with the given service-application.
+
+'''
+
+
+* The [.underline]#type# is the management group that the rule corresponds to.
+* It is used to specify which of the management groups the subsequent module
+  is to be associated with.
+* Valid entries are:
+
+'''
+
+password::
+* this module type is required for updating the authentication token
+  associated with the user.
+* Typically, there is one module for each 'challenge/response' based
+  authentication (auth) type.
+
+'''
+
+* The third field, [.underline]#control#, indicates the behavior of the
+  PAM-API should the module fail to succeed in its authentication task.
+* There are two types of syntax for this control field: the simple one has a
+  single simple keyword; the more complicated one involves a square-bracketed
+  selection of [.underline]#value=action# pairs.
+
+'''
+
+* For the simple (historical) syntax valid [.underline]#control# values are:
+
+'''
+
+required::
+* failure of such a PAM will ultimately lead to the PAM-API returning failure
+  but only after the remaining [.underline]#stacked# modules (for this
+  [.underline]#service# and [.underline]#type#) have been invoked.
+
+'''
+
+* [.underline]#module-path# is either the full filename of the PAM to be used
+  by the application (it begins with a '/'), or a relative pathname from the
+  default module location: /lib/security/ or /lib64/security/, depending on
+  the architecture.
+
+'''
+
+* [.underline]#module-arguments# are a space separated list of tokens that can
+  be used to modify the specific behavior of the given PAM.
+* Such arguments will be documented for each individual module.
+* Note, if you wish to include spaces in an argument, you should surround that
+  argument with square brackets.
+
+'''
+
+* Any line in (one of) the configuration file(s), that is not formatted
+  correctly, will generally tend (erring on the side of caution) to make the
+  authentication process fail.
+* A corresponding error is written to the system log files with a call to
+  *syslog*(3).
+
+'''
+
+* More flexible than the single configuration file is it to configure libpam
+  via the contents of the /etc/pam.d/ directory.
+* In this case the directory is filled with files each of which has a filename
+  equal to a service-name (in lower-case): it is the personal configuration
+  file for the named service.
+
+'''
+
+* The syntax of each file in /etc/pam.d/ is similar to that of the
+  /etc/pam.conf file and is made up of lines of the following form:
++
+....
+type  control  module-path  module-arguments
+....
+
+* The only difference being that the service-name is not present.
+* The service-name is of course the name of the given configuration file.
+* For example, /etc/pam.d/login contains the configuration for the login
+  service.
