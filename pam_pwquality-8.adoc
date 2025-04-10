@@ -1,0 +1,172 @@
+= PAM_PWQUALITY(8)
+
+* Linux-PAM Manual
+
+== Name
+
+* pam_pwquality - PAM module to perform password quality checking
+
+== Synopsis
+
+....
+pam_pwquality.so [...]
+....
+
+== Description
+
+* This module can be plugged into the *password* stack of a given service to
+  provide some plug-in strength-checking for passwords.
+* The code was originally based on pam_cracklib module and the module is
+  backwards compatible with its options.
+
+'''
+
+* The action of this module is to prompt the user for a password and check its
+  strength against a system dictionary and a set of rules for identifying poor
+  choices.
+
+'''
+
+* The first action is to prompt for a single password, check its strength and
+  then, if it is considered strong, prompt for the password a second time (to
+  verify that it was typed correctly on the first occasion).
+* All being well, the password is passed on to subsequent modules to be
+  installed as the new authentication token.
+
+'''
+
+* The checks for strength are:
+
+'''
+
+Similar::
+* Is the new password too much like the old one?
+* This is primarily controlled by one argument, *difok* which is a number of
+  character changes (inserts, removals, or replacements) between the old and
+  new password that are enough to accept the new password.
+
+Simple::
+* Is the new password too small?
+* This is controlled by 6 arguments *minlen*, *maxclassrepeat*, *dcredit*,
+  *ucredit*, *lcredit*, and *ocredit*.
+* See the section on the arguments for the details of how these work and there
+  defaults.
+
+Same consecutive characters::
+* Optional check for same consecutive characters.
+
+Contains user name::
+* Check whether the password contains the user's name in some form.
+
+== Options
+
+`*retry=*[.underline]#N#`::
+* Prompt user at most [.underline]#N# times before returning with error.
+* The default is [.underline]#1#.
+
+`*difok=*[.underline]#N#`::
+* This argument will change the default of [.underline]#1# for the number of
+  changes in the new password from the old password.
+
+'''
+
+* The special value of [.underline]#0# disables all checks of similarity of
+  the new password with the old password except the new password being exactly
+  the same as the old one.
+
+`*minlen=*[.underline]#N#`::
+* The minimum acceptable size for the new password (plus one if credits are
+  not disabled which is the default).
+* In addition to the number of characters in the new password, credit (of +1
+  in length) is given for each different kind of character (other, upper,
+  lower and digit).
+* The default for this parameter is 8.
+
+`*dcredit=*[.underline]#N#`::
+* (N >= 0) This is the maximum credit for having digits in the new password.
+* If you have less than or [.underline]#N# digits, each digit will count +1
+  towards meeting the current *minlen* value.
+* The default for *dcredit* is [.underline]#0# which means there is no bonus
+  for digits in password.
+
+* (N < 0) This is the minimum number of digits that must be met for a new
+  password.
+
+`*ucredit=*[.underline]#N#`::
+* (N >= 0) This is the maximum credit for having upper case letters in the new
+  password.
+* If you have less than or [.underline]#N# upper case letters, each upper case
+  letter will count +1 towards meeting the current *minlen* value.
+* The default for *ucredit* is [.underline]#0# which means there is no bonus for upper case
+  letters in password.
+
+'''
+
+* (N < 0) This is the minimum number of upper case letters that must be met
+  for a new password.
+
+`*lcredit=*[.underline]#N#`::
+* (N >= 0) This is the maximum credit for having lower case letters in the new
+  password.
+* If you have less than or [.underline]#N# lower case letters, each lower case letter will
+  count +1 towards meeting the current minlen value.
+* The default for *lcredit* is [.underline]#0# which means there is no bonus
+  for lower case letters in password.
+
+'''
+
+* (N < 0) This is the minimum number of lower case letters that must be met
+  for a new password.
+
+`*maxrepeat=*[.underline]#N#`::
+* Reject passwords which contain more than [.underline]#N# same consecutive
+  characters.
+* The default is [.underline]#0# which means that this check is disabled.
+
+`*usercheck=*[.underline]#N#`::
+* If nonzero, check whether the password (with possible modifications)
+  contains the user name in some form.
+* The default is [.underline]#1# which means that this check is enabled.
+* It is not performed for user names shorter than 3 characters.
+
+`*enforce_for_root*`::
+* The module will return error on failed check even if the user changing the
+  password is root.
+* This option is off by default which means that just the message about the
+  failed check is printed but root can change the password anyway.
+* Note that root is not asked for an old password so the checks that compare
+  the old and new password are not performed.
+
+== Module types provided
+
+* Only the *password* module type is provided.
+
+== Examples
+
+* For an example of the use of this module, we show how it may be stacked with
+  the password component of *pam_unix*(8).
++
+....
+#
+# These lines stack two password type modules. In this example the
+# user is given 3 opportunities to enter a strong password. The
+# "use_authtok" argument ensures that the pam_unix module does not
+# prompt for a password, but instead uses the one provided by
+# pam_pwquality.
+#
+password required pam_pwquality.so retry=3
+password required pam_unix.so use_authtok
+....
+
+* And here is another example in case you don't want to use credits:
++
+....
+#
+# These lines require the user to select a password with a minimum
+# length of 8 and with at least 1 digit number, 1 upper case letter,
+# and 1 other character
+#
+password required pam_pwquality.so \
+			 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=0 minlen=8
+password required pam_unix.so use_authtok nullok sha256
+....
