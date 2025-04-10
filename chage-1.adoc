@@ -1,0 +1,97 @@
+= CHAGE(1)
+
+* User Commands
+
+== Name
+
+* chage - change user password expiry information
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*chage* {startsb}[.underline]#options#] [.underline]#LOGIN#
+....
+
+== Description
+
+* The *chage* command changes the number of days between password changes and
+  the date of the last password change.
+* This information is used by the system to determine when a user must change
+  their password.
+
+'''
+
+== Options
+
+* The options which apply to the *chage* command are:
+
+'''
+
+`*-m*, *--mindays* [.underline]#MIN_DAYS#`::
+* Set the minimum number of days between password changes to
+  [.underline]#MIN_DAYS#.
+* A value of zero for this field indicates that the user may change their
+  password at any time.
+
+`*-M*, *--maxdays* [.underline]#MAX_DAYS#`::
+* Set the maximum number of days during which a password is valid.
+* When [.underline]#MAX_DAYS# plus [.underline]#LAST_DAY# is less than the
+  current day, the user will be required to change their password before being
+  able to use their account.
+* This occurrence can be planned for in advance by use of the *-W* option,
+  which provides the user with advance warning.
++
+'''
+* Passing the number [.underlin]#-1# as [.underline]#MAX_DAYS# will remove
+  checking a password's validity.
+
+`*-W*, *--warndays* [.underline]#WARN_DAYS#`::
+* Set the number of days of warning before a password change is required.
+* The [.underline]#WARN_DAYS# option is the number of days prior to the
+  password expiring that a user will be warned their password is about to
+  expire.
+
+'''
+
+* If none of the options are selected, *chage* operates in an interactive
+  fashion, prompting the user with the current values for all of the fields.
+* Enter the new value to change the field, or leave the line blank to use the
+  current value.
+* The current value is displayed between a pair of [ ] marks.
+
+== Note
+
+* The *chage* program requires a shadow password file to be available.
+
+'''
+
+* The *chage* program will report only the information from the shadow
+  password file.
+* This implies that configuration from other sources (e.g. LDAP or empty
+  password hash field from the passwd file) that affect the user's login will
+  not be shown in the chage output.
+
+'''
+
+* The *chage* program will also not report any inconsistency between the
+  shadow and passwd files (e.g. missing x in the passwd file).
+* The *pwck* can be used to check for this kind of inconsistencies.
+
+'''
+
+* The chage command is restricted to the root user, except for the *-l*
+  option, which may be used by an unprivileged user to determine when their
+  password or account is due to expire.
+
+== Files
+
+/etc/passwd::
+* User account information.
+
+/etc/shadow::
+* Secure user account information.
+
+'''
+
+* shadow-utils 4.13, 03/23/2023
