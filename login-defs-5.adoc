@@ -1,5 +1,7 @@
 = LOGIN.DEFS(5)
 
+* File Formats and Configuration
+
 == Name
 
 * login.defs - shadow password suite configuration
@@ -71,3 +73,15 @@ PASS_WARN_AGE (number)::
 * *PASS_MAX_DAYS*, *PASS_MIN_DAYS* and *PASS_WARN_AGE* are only used at the
   time of account creation.
 * Any changes to these settings won't affect existing accounts.
+
+== Bugs
+
+* Much of the functionality that used to be provided by the shadow password
+  suite is now handled by PAM.
+* Thus, /etc/login.defs is no longer used by *passwd*(1), or less used by
+  *login*(1), and *su*(1).
+* Please refer to the corresponding PAM configuration files instead.
+
+'''
+
+* shadow-utils 4.13, 03/23/2023
