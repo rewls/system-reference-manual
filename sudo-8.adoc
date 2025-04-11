@@ -1,0 +1,39 @@
+= SUDO(8)
+
+* BSD System Manager's Manual
+
+== Name
+
+* sudo, sudoedit -- execute a command as another user
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+sudo {startsb}[.underline]##command## {startsb}[.underline]##arg## [.underline]#...#]]
+....
+
+== Description
+
+* *sudo* allows a permitted user to execute a [.underline]#command# as the
+  superuser or another user, as specified by the security policy.
+* The invoking user's real (not effective) user-ID is used to determine the
+  user name with which to query the security policy.
+
+'''
+
+* *sudo* supports a plugin architecture for security policies, auditing, and
+  input/output logging.
+* Third parties can develop and distribute their own plugins to work
+  seamlessly with the *sudo* front-end.
+* The default security policy is [.underline]#sudoers#, which is configured
+  via the file [.underline]#/etc/sudoers#, or via LDAP.
+* See the [.underline]#Plugins# section for more information.
+
+== See also
+
+* sudoers(5)
+
+'''
+
+* Sudo 1.9.13p3, January 16, 2023
