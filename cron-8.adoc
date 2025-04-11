@@ -1,0 +1,97 @@
+= CRON(8)
+
+* System Manager's Manual
+
+== Name
+
+* cron - daemon to execute scheduled commands (Vixie Cron)
+
+== Description
+
+* [.underline]#cron# is started automatically from /etc/init.d on entering
+  multi-user runlevels.
+
+== Notes
+
+* [.underline]#cron# searches its spool area (/var/spool/cron/crontabs) for
+  crontab files (which are named after accounts in /etc/passwd); crontabs
+  found are loaded into memory.
+* Note that crontabs in this directory should not be accessed directly - the
+  [.underline]#crontab# command should be used to access and update them.
+
+'''
+
+* [.underline]#cron# also reads /etc/crontab, which is in a slightly different
+  format (see [.underline]#crontab#(5)).
+* In Debian, the content of /etc/crontab is predefined to run programs under
+  /etc/cron.hourly, /etc/cron.daily, /etc/cron.weekly and /etc/cron.monthly.
+* This configuration is specific to Debian, see the note under *DEBIAN
+  SPECIFIC* below.
+
+'''
+
+* Additionally, in Debian, [.underline]#cron# reads the files in the
+  /etc/cron.d directory.
+* [.underline]#cron# treats the files in /etc/cron.d as in the same way as the
+  /etc/crontab file (they follow the special format of that file, i.e. they
+  include the user field).
+* However, they are independent of /etc/crontab: they do not, for example,
+  inherit environment variable settings from it.
+* This change is specific to Debian see the note under *DEBIAN SPECIFIC* below.
+
+'''
+
+* Like /etc/crontab, the files in the /etc/cron.d directory are monitored for
+  changes.
+* In general, the system administrator should not use /etc/cron.d/, but use
+  the standard system crontab /etc/crontab.
+
+'''
+
+* /etc/crontab and the files in /etc/cron.d must be owned by root, and must
+  not be group- or other-writable.
+* In contrast to the spool area, the files under /etc/cron.d or the files
+  under /etc/cron.hourly, /etc/cron.daily, /etc/cron.weekly and
+  /etc/cron.monthly  may  also  be  symlinks,  provided that both the symlink
+  and the file it points to are owned by root.
+* The files under /etc/cron.d do not need to be executable, while the files
+  under /etc/cron.hourly, /etc/cron.daily, /etc/cron.weekly and
+  /etc/cron.monthly do, as they are run by [.underline]#run-parts# (see
+  [.underline]#run-parts#(8) for more information).
+
+'''
+
+* [.underline]#cron# then wakes up every minute, examining all stored
+  crontabs, checking each command to see if it should be run in the current
+  minute.
+* When executing commands, any output is mailed to the owner of the crontab
+  (or to the user named in the MAILTO environment variable in the crontab, if
+  such exists) from the owner of the crontab (or from the email address given in
+  the MAILFROM environment variable in the crontab, if such exists).
+* The children copies of cron running these processes have their name coerced
+  to uppercase, as will be seen in the syslog and ps output.
+
+'''
+
+* Additionally, [.underline]#cron# checks each minute to see if its spool
+  directory's modtime (or the modtime on the [.underline]#/etc/crontab# file)
+  has changed, and if it has, [.underline]#cron# will then examine the modtime
+  on all crontabs and reload those which have changed.
+* Thus [.underline]#cron# need not be restarted whenever a crontab file is
+  modified.
+* Note that the [.underline]#crontab#(1) command updates the modtime of the
+  spool directory whenever it changes a crontab.
+
+'''
+
+* [.underline]#cron# logs its action to the syslog facility 'cron', and
+  logging may be controlled using the standard [.underline]#syslogd#(8)
+  facility.
+
+== See also
+
+* crontab(1), crontab(5)
+
+'''
+
+* 4th Berkeley Distribution, 19 April 2010
