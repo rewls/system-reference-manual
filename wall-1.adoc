@@ -1,0 +1,38 @@
+= WALL(1)
+
+* User Commands
+
+== Name
+
+* wall - write a message to all users
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*wall* [*-n*] {startsb}**-t** [.underline]#timeout#] {startsb}**-g** [.underline]#group#] {startsb}[.underline]##message## | [.underline]#file#]
+....
+
+== Description
+
+* *wall* displays a [.underline]#message#, or the contents of a
+  [.underline]#file#, or otherwise its standard input, on the terminals of all
+  currently logged in users.
+* The command will wrap lines that are longer than 79 characters.
+* Short lines are whitespace padded to have 79 characters.
+* The command will always put a carriage return and new line at the end of
+  each line.
+
+'''
+
+* Only the superuser can write on the terminals of users who have chosen to
+  deny messages or are using a program which automatically denies messages.
+
+'''
+
+* Reading from a [.underline]#file# is refused when the invoker is not
+  superuser and the program is set-user-ID or set-group-ID.
+
+'''
+
+* util-linux 2.38.1, 2022-05-11
