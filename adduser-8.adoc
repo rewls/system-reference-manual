@@ -6,6 +6,19 @@
 
 * adduser, addgroup - add or manipulate users or groups
 
+== Synopsis
+
+[subs="quotes"]
+....
+*adduser* *user*
+
+*adduser* *--group* *group*
+
+*addgroup* *group*
+
+*adduser* *user* *group*
+....
+
 == Description
 
 * *adduser* and *addgroup* add users and groups to the system according to
