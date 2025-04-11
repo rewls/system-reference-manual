@@ -1,0 +1,96 @@
+= CRONTAB(5)
+
+* File Formats Manual
+
+== Name
+
+* crontab - tables for driving cron
+
+== Description
+
+* A [.underline]#crontab# file contains instructions to the
+  [.underline]#cron#(8) daemon of the general form: "run this command at this
+  time on this date".
+* Each user has their own crontab, and  commands in any given crontab will be
+  executed as the user who owns the crontab.
+* Uucp and News will usually have their own crontabs, eliminating the need for
+  explicitly running [.underline]#su#(1) as part of a cron command.
+
+'''
+
+* Blank lines and leading spaces and tabs are ignored.
+* Lines whose first non-space character is a pound-sign (#) are comments, and
+  are ignored.
+* Note that comments are not allowed on the same line as cron commands, since
+  they will be taken to be part of the command.
+* Similarly, comments are not allowed on the same line as environment variable
+  settings.
+
+'''
+
+* An active line in a crontab will be either an environment setting or a cron
+  command.
+* An environment setting is of the form,
++
+[source,crontab]
+----
+name = value
+----
++
+where the spaces around the equal-sign (=) are optional, and any subsequent
+non-leading spaces in value will be part of the [.underline]#value# assigned to
+[.underline]#name#.
+* The [.underline]#value# string may be placed in quotes (single or double, but matching) to
+  preserve leading or trailing blanks.
+
+'''
+
+* The format of a cron command is very much the V7 standard, with a number of
+  upward-compatible extensions.
+* Each line has five time and date fields, followed by a user name if this is
+  the system crontab file, followed by a command.
+* Commands are executed by [.underline]#cron#(8) when the minute, hour, and
+  month of year fields match the current time, and when at least one of the
+  two day fields (day of month, or day of week) match the current time (see
+  "Note" below).
+* [.underline]#cron#(8) examines cron entries once every minute.
+* The time and date fields are:
++
+|===
+|field		|allowed values
+
+|minute		|0-59
+|hour		|0-23
+|day of month	|0-31
+|month		|0-12 (or names, see below)
+|day of week	|0-7 (0 or 7 is Sun, or use names)
+|===
+
+* A field may be an asterisk (*), which always stands for "first-last".
+
+'''
+
+* Ranges of numbers are allowed.
+* Ranges are two numbers separated with a hyphen.
+* The specified range is inclusive.
+
+'''
+
+* Step values can be used in conjunction with ranges.
+* Following a range with "/<number>" specifies skips of the number's value
+  through the range.
+* Steps are also permitted after an asterisk.
+
+'''
+
+* The "sixth" field (the rest of the line) specifies the command to be run.
+* The entire command portion of the line, up to a newline or % character, will
+  be executed by /bin/sh or by the shell specified in the SHELL variable of
+  the cronfile.
+* Percent-signs (%) in the command, unless escaped with backslash (\), will be
+  changed into newline characters, and all data after the first % will be sent
+  to the command as standard input.
+
+'''
+
+* 4th Berkeley Distribution, 24 January 1994 
