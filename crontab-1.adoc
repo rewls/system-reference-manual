@@ -1,0 +1,50 @@
+= CRONTAB(1)
+
+* General Commands Manual
+
+== Name
+
+* crontab - maintain crontab files for individual users (Vixie Cron)
+
+== Description
+
+* [.underline]#crontab# is the program used to install, deinstall or list the
+  tables used to drive the cron(8) daemon in Vixie Cron.
+* Each user can have their own crontab, and though these are files in
+  /var/spool/cron/crontabs, they are not intended to be edited directly.
+
+'''
+
+* If the [.underline]#/etc/cron.allow# file exists, then you must be listed
+  (one user per line) therein in order to be allowed to use this command.
+* If the [.underline]#/etc/cron.allow# file does not exist but the
+  [.underline]#/etc/cron.deny# file does exist, then you must not be listed in
+  the [.underline]#/etc/cron.deny# file in order to use this command.
+
+'''
+
+* If neither of these files exists, then depending on site-dependent
+  configuration  parameters, only the super user will be allowed to use this
+  command, or all users will be able to use this command.
+
+'''
+
+* If both files exist then [.underline]#/etc/cron.allow# takes precedence.
+* Which means that [.underline]#/etc/cron.deny# is not considered and your
+  user must be listed in [.underline]#/etc/cron.allow# in order to be able to
+  use the crontab.
+
+'''
+
+* Regardless of the existence of any of these files, the root administrative
+  user is always  allowed to setup a crontab.
+* For standard Debian systems, all users may use this command.
+
+'''
+
+* The first form of this command is used to install a new crontab from some
+  named file or standard input if the pseudo-filename '-' is given.
+
+'''
+
+* 4th Berkeley Distribution, 19 April 2010
