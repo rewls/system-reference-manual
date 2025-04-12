@@ -1,0 +1,135 @@
+= proc(5)
+
+* File Formats Manual
+
+== Name
+
+* proc - process information pseudo-filesystem
+
+== Description
+
+* The *proc* filesystem is a pseudo-filesystem which provides an interface to
+  kernel data structures.
+* It is commonly mounted at [.underline]#/proc#.
+* Typically, it is mounted automatically by  the system, but it can also be
+  mounted manually using a command such as:
++
+[source,sh]
+mount -t proc proc /proc
+
+* Most of the files in the *proc* filesystem are read-only, but some files are
+  writable, allowing kernel variables to be changed.
+
+=== Overview
+
+* Underneath [.underline]#/proc#, there are the following general groups of
+  files and subdirectories:
+
+'''
+
+[.underline]##/proc/##pid subdirectories::
+* Each one of these subdirectories contains files and subdirectories exposing
+  information about the process with the corresponding process ID.
++
+'''
+
+* Underneath each of the [.underline]##/proc/##pid directories, a
+  [.underline]#task# subdirectory contains subdirectories of the form
+  [.underline]##task/##tid, which contain corresponding information about each
+  of the threads in the process, where [.underline]#tid# is the kernel thread
+  ID of the thread.
++
+'''
+
+* The [.underline]##/proc/##pid subdirectories are visible when iterating
+  through [.underline]#/proc# with *getdents*(2) (and thus are visible when
+  one uses *ls*(1) to view the contents of [.underline]#/proc#).
+
+[.underline]##/proc/##tid subdirectories::
+* Each one of these subdirectories contains files and subdirectories exposing
+  information about the thread with the corresponding thread ID.
+* The contents of these directories are the same as the corresponding
+  [.underline]##/proc/##pid[.underline]##/task/##tid directories.
++
+'''
+
+* The [.underline]##/proc/##tid subdirectories are [.underline]#not# visible
+  when iterating  through [.underline]#/proc#  with *getdents*(2) (and thus
+  are not visible when one uses *ls*(1) to view the contents of
+  [.underline]#/proc#).
+
+[.underline]#/proc/[a-z]*#::
+* Various other files and subdirectories under [.underline]#/proc# expose
+  system-wide information.
+
+'''
+
+* All of the above are described in more detail below.
+
+
+[.underline]#/proc/cpuinfo#::
+* This is a collection of CPU and system architecture dependent items, for
+  each supported architecture a different list.
+* Two common entries are [.underline]#processor# which gives CPU number and
+  [.underline]#bogomips#; a system constant that is calculated during kernel
+  initialization.
+* SMP machines have information for each CPU.
+* The *lscpu*(1) command gathers its information from this file.
+
+[.underline]#/proc/meminfo#::
+* This file reports statistics about memory usage on the system.
+* It is used by *free*(1) to report the amount of free and used memory (both
+  physical and swap) on the system as well as the shared memory and buffers
+  used by the kernel.
+* Each line of the file consists of a parameter name, followed by a colon, the
+  value of the parameter, and an option unit of measurement (e.g., "kB").
+* The list below describes the parameter names and the format specifier
+  required to read the field value.
+* Except as noted below, all of the fields have been present since at least
+  Linux 2.6.0.
+* Some fields are displayed only if the kernel was configured with various
+  options; those dependencies are noted in the list.
++
+'''
+
+[.underline]#MemTotal# %lu::
+* Total usable RAM (i.e., physical RAM minus a few reserved bits and the
+  kernel binary code).
+
+[.underline]#MemFree# %lu::
+* The sum of [.underline]##LowFree##+[.underline]##HighFree##.
+
+[.underline]#MemAvailable# %lu (since Linux 3.14)::
+* An estimate of how much memory is available for starting new applications,
+  without swapping.
+
+[.underline]#Buffers# %lu::
+* Relatively temporary storage for raw disk blocks that shouldn't get
+  tremendously large (20 MB or so).
+
+[.underline]#Cached# %lu::
+* In-memory cache for files read from the disk (the page cache).
+* Doesn't include [.underline]#SwapCached#.
+
+[.underline]#HighFree# %lu::
+* (Starting with Linux 2.6.19, *CONFIG_HIGHMEM* is required.)
+* Amount of free highmem.
+
+[.underline]#LowFree# %lu::
+* (Starting with Linux 2.6.19 *CONFIG_HIGHMEM* is required.)
+* Amount of free lowmem.
+
+[.underline]#SwapTotal# %lu::
+* Total amount of swap space available.
+
+[.underline]#SwapFree# %lu::
+* Amount of swap space that is currently unused.
+
+[.underline]#Shmem# %lu (since Linux 2.6.32):
+* Amount of memory consumed in *tmpfs*(5) filesystems.
+
+[.underline]#Slab# %lu::
+* In-kernel data structures cache. (See *slabinfo*(5).)
+
+[.underline]#SReclaimable# %lu (since Linux 2.6.19)::
+* Part of [.underline]#Slab#, that might be reclaimed, such as caches.
