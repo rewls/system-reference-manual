@@ -1,0 +1,26 @@
+= NPROC(1)
+
+* User Commands
+
+== Name
+
+* nproc - print the number of processing units available
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*nproc* {startsb}[.underline]#OPTION#]...
+....
+
+== Description
+
+* Print the number of processing units available to the current process, which
+  may be less than the number of online processors
+
+--all::
+* print the number of installed processors
+
+'''
+
+* GNU coreutils 9.1, September 2022
