@@ -1,0 +1,135 @@
+= LSCPU(1)
+
+* User Commands
+
+== Name
+
+* lscpu - display information about the CPU architecture
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*lscpu* {startsb}[.underline]##options##]
+....
+
+== Description
+
+* *lscpu* gathers CPU architecture information from [.underline]#sysfs#,
+  [.underline]#/proc/cpuinfo# and any applicable architecture-specific
+  libraries (e.g. *librtas* on Powerpc).
+* The command output can be optimized for parsing or for easy readability by
+  humans.
+* The information includes, for example, the number of CPUs, threads, cores,
+  sockets, and Non-Uniform Memory Access (NUMA) nodes.
+* There is also information about the CPU caches and cache sharing, family,
+  model, bogoMIPS, byte order, and stepping.
+
+'''
+
+* The default output formatting on terminal is subject to change and maybe
+  optimized for better readability.
+* The output for non-terminals (e.g., pipes) is never affected by this
+  optimization and it is always in "Field: data\n" format.
+* Use for example "*lscpu | less*" to see the default output without
+  optimizations.
+
+'''
+
+* In virtualized environments, the CPU architecture information displayed
+  reflects the configuration of the guest operating system which is typically
+  different from the physical (host) system.
+* On architectures that support retrieving physical topology information,
+  *lscpu* also displays the number of physical sockets, chips, cores in the host
+  system.
+
+'''
+
+* Options that result in an output table have a list argument.
+* Use this argument to customize the command output.
+* Specify a comma-separated list of column labels to limit the output table to
+  only the specified columns, arranged in the specified order.
+* See *COLUMNS* for a list of valid column labels. (?)
+* The column labels are not case sensitive.
+
+'''
+
+* Not all columns are supported on all architectures. If an unsupported column
+  is specified, *lscpu* prints the column but does not provide any data for it.
+
+'''
+
+* The cache sizes are reported as summary from all CPUs.
+* The versions before v2.34 reported per-core sizes, but this output was
+  confusing due to complicated CPUs topology and the way how caches are shared
+  between CPUs.
+* For more details about caches see *--cache*.
+* Since version v2.37 *lscpu* follows cache IDs as provided by Linux kernel
+  and it does not always start from zero.
+
+== Options
+
+`*-a*`, `*--all*`::
+* Include lines for online and offline CPUs in the output (default for *-e*).
+* This option may only be specified together with option *-e* or *-p*.
+
+`*-b*`, `*--online*`::
+* Limit the output to online CPUs (default for *-p*).
+* This option may only be specified together with option *-e* or *-p*.
+
+`*-C*`, `*--caches*{startsb}=[.underline]##list##]`::
+* Display details about CPU caches.
+* For details about available information see *--help* output.
++
+'''
+
+* If the [.underline]#list# argument is omitted, all columns for which data is available are
+  included in the command output.
++
+'''
+
+* When specifying the [.underline]#list# argument, the string of option, equal sign (=), and
+  [.underline]#list# must not contain any blanks or other whitespace.
+* Examples: *-C=NAME,ONE-SIZE* or *--caches=NAME,ONE-SIZE*.
++
+'''
+
+* The default list of columns may be extended if list is specified in the
+  format +list (e.g., *lscpu -C=+ALLOC-POLICY*).
+
+`*-p*`, `*--parse*{startsb}=[.underline]#list#]`::
+* Optimize the command output for easy parsing.
++
+'''
+
+* If the [.underline]#list# argument is omitted, the command output is compatible with
+  earlier versions of *lscpu*.
+* In this compatible format, two commas are used to separate CPU cache
+  columns.
+* If no CPU caches are identified the cache column is omitted.
+* If the [.underline]#list# argument is used, cache columns are separated with
+  a colon (:). (?)
++
+'''
+
+* When specifying the [.underline]#list# argument, the string of option, equal sign (=), and list must not contain any blanks or other whitespace.
+* Examples: '*-p=cpu,node*' or '*--parse=cpu,node*'.
++
+'''
+
+* The default list of columns may be extended if list is specified in the
+  format +list (e.g., lscpu -p=+MHZ).
+
+`*--output-all*`::
+* Output all available columns.
+* This option must be combined with either *--extended*, *--parse* or
+  *--caches*.
+
+== Bugs
+
+* The basic overview of CPU family, model, etc. is always based on the first
+  CPU only.
+
+'''
+
+* util-linux 2.38.1, 2022-08-04
