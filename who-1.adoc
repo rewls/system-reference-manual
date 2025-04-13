@@ -1,0 +1,39 @@
+= WHO(1)
+
+* User Commands
+
+== Name
+
+* who - show who is logged on
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*who* {startsb}[.underline]#OPTION#]... [ [.underline]#FILE# [.underline]#|# [.underline]#ARG1# [.underline]#ARG2# ]
+....
+
+== Description
+
+* Print information about users who are currently logged in.
+
+'''
+
+-b, --boot::
+* time of last system boot
+
+-m::
+* only hostname and user associated with stdin
+
+-s, --short::
+* print only name, line, and time (default)
+
+'''
+
+* If FILE is not specified, use [.underline]#/var/run/utmp#.
+* [.underline]#/var/log/wtmp# as FILE is common.
+* If ARG1 ARG2 given, [.underline]#-m# presumed: 'am i' or 'mom likes' are usual.
+
+'''
+
+* GNU coreutils 9.1, September 2022
