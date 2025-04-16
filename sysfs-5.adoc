@@ -1,0 +1,94 @@
+= sysfs(5)
+
+* File Formats Manual
+
+== Name
+
+* sysfs - a filesystem for exporting kernel objects
+
+== Description
+
+* The *sysfs* filesystem is a pseudo-filesystem which provides an interface to
+  kernel data structures.
+* (More precisely, the files and directories in *sysfs* provide a view of the
+  [.underline]#kobject# structures defined internally within the kernel.)
+* The files under *sysfs* provide information about devices, kernel modules,
+  filesystems, and other kernel components.
+
+'''
+
+* The *sysfs* filesystem is commonly mounted at [.underline]#/sys#.
+* Typically, it is mounted automatically by the system, but it can also be
+  mounted manually using a command such as:
++
+....
+mount -t sysfs sysfs /sys
+....
+
+* Many of the files in the *sysfs* filesystem are read-only, but some files
+  are writable, allowing kernel variables to be changed.
+* To avoid redundancy, symbolic links are heavily used to connect entries
+  across the file system tree.
+
+=== Files and directories
+
+* The following list describes some of the files and directories under the
+  [.underline]#/sys# hierarchy.
+
+'''
+
+[.underline]#/sys/bus##::
+* This directory contains one subdirectory for each of the bus types in the
+  kernel.
+* Inside each of these directories are two subdirectories:
+[.underline]#devices#:::
+** This subdirectory contains symbolic links to entries in
+  [.underline]#/sys/devices# that correspond to the devices discovered on this
+  bus.
+
+[.underline]#/sys/class#::
+* This subdirectory contains a single layer of further subdirectories for each
+  of the device classes that have been registered on the system (e.g.,
+  terminals, network devices, block devices, graphics devices, sound devices,
+  and so on).
+* Inside each of these subdirectories are symbolic links for each of the
+  devices in this class.
+* These symbolic links refer to entries in the [.underline]#/sys/devices#
+  directory.
+
+[.underline]#/sys/devices#::
+* This is a directory that contains a filesystem representation of the kernel
+  device tree, which is a hierarchy of device structures within the kernel.
+
+[.underline]#/sys/firmware#::
+* This subdirectory contains interfaces for viewing and manipulating
+  firmware-specific objects and attributes.
+
+[.underline]#/sys/kernel#::
+* This subdirectory contains various files and subdirectories that provide
+  information about the running kernel.
+
+[.underline]#/sys/module#::
+* This subdirectory contains one subdirectory for each module that is loaded
+  into the kernel.
+* The name of each directory is the name of the module.
+* In each of the subdirectories, there may be following subdirectories:
+
+'''
+
+[.underline]#parameters#::
+* This directory contains one file for each module parameter, with each file
+  containing the value of the corresponding parameter.
+
+== Standards
+
+* The *sysfs* filesystem is Linux-specific.
+
+== Notes
+
+* This manual page is incomplete, possibly inaccurate, and is the kind of
+  thing that needs to be updated very often.
+
+'''
+
+* Linux man-pages 6.03, 2022-10-30
