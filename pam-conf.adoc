@@ -96,6 +96,19 @@ required::
   but only after the remaining [.underline]#stacked# modules (for this
   [.underline]#service# and [.underline]#type#) have been invoked.
 
+requisite::
+* like [.underline]#required#, however, in the case that such a module returns
+  a failure, control is directly returned to the application or to the
+  superior PAM stack.
+* The return value is that associated with the first required or requisite
+  module to fail.
+* Note, this flag can be used to protect against the possibility of a user
+  getting the opportunity to enter a password over an unsafe medium.
+* It is conceivable that such behavior might inform an attacker of valid
+  accounts on a system.
+* This possibility should be weighed against the not insignificant concerns of
+  exposing a sensitive password in a hostile environment.
+
 '''
 
 * [.underline]#module-path# is either the full filename of the PAM to be used

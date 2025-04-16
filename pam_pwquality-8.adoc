@@ -67,7 +67,7 @@ Contains user name::
 `*difok=*[.underline]#N#`::
 * This argument will change the default of [.underline]#1# for the number of
   changes in the new password from the old password.
-
++
 '''
 
 * The special value of [.underline]#0# disables all checks of similarity of
@@ -99,7 +99,7 @@ Contains user name::
   letter will count +1 towards meeting the current *minlen* value.
 * The default for *ucredit* is [.underline]#0# which means there is no bonus for upper case
   letters in password.
-
++
 '''
 
 * (N < 0) This is the minimum number of upper case letters that must be met
@@ -112,7 +112,7 @@ Contains user name::
   count +1 towards meeting the current minlen value.
 * The default for *lcredit* is [.underline]#0# which means there is no bonus
   for lower case letters in password.
-
++
 '''
 
 * (N < 0) This is the minimum number of lower case letters that must be met

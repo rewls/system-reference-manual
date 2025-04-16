@@ -42,6 +42,9 @@
 '''
 
 * The following configuration items are provided:
+
+'''
+
 LOGIN_RETRIES (number)::
 * Maximum number of login retries in case of bad password.
 +
