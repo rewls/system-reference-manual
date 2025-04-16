@@ -41,6 +41,7 @@ mount -t proc proc /proc
 +
 '''
 
+
 * The [.underline]##/proc/##pid subdirectories are visible when iterating
   through [.underline]#/proc# with *getdents*(2) (and thus are visible when
   one uses *ls*(1) to view the contents of [.underline]#/proc#).
@@ -186,6 +187,44 @@ mount -t proc proc /proc
 [.underline]#guest_nice# (since Linux 2.6.33)::
 * (10) Time spent running a niced guest (virtual CPU for guest operating
   systems under the control of the Linux kernel).
+
+==== [.underline]#/proc/sys#
+
+* This directory (present since Linux 1.3.57) contains a number of files and
+  subdirectories corresponding to kernel variables.
+* These variables can be read and in some cases modified using the
+  [.underline]#/proc# filesystem, and the (deprecated) *sysctl*(2) system
+  call.
+
+'''
+
+* String values may be terminated by either '\0' or '\n'.
+
+'''
+
+* Integer and long values may be written either in decimal or in hexadecimal
+  notation (e.g., 0x3FFF).
+* When writing multiple integer or long values, these may be separated by any
+  of the following whitespace characters: ' ', '\t', or '\n'.
+* Using other separators leads to the error EINVAL.
+
+==== [.underline]#/proc/sys/kernel#
+
+* This directory contains files controlling a range of kernel parameters, as
+  described below.
+
+==== [.underline]#/proc/sys/kernel/pty# (since Linux 2.6.4)
+
+* This directory contains two files relating to the number of UNIX 98
+  pseudoterminals (see *pts*(4)) on the system.
+
+==== [.underline]#/proc/sys/kernel/pty/max#
+
+* This file defines the maximum number of pseudoterminals.
+
+==== [.underline]#/proc/sys/kernel/pty/nr#
+
+* This read-only file indicates how many pseudoterminals are currently in use.
 
 == Notes
 
