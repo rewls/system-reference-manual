@@ -1,0 +1,37 @@
+= LVS(8)
+
+* System Manager's Manual
+
+== Name
+
+* lvs -- Display information about logical volumes
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*lvs*
+	{startsb} [.underline]#option_args# ]
+	{startsb} [.underline]#position_args# ]
+
+== Description
+
+* lvs produces formatted output about LVs.
+
+== Usage
+
+[subs="attributes,quotes+"]
+....
+*lvs*
+	{startsb}    *--noheadings* ]
+....
+
+== Options
+
+`*--noheadings*`::
+* Suppress the headings line that is normally the first line of output.
+* Useful if grepping the output.
+
+'''
+
+* Red Hat, Inc., LVM TOOLS 2.03.16(2) (2022-05-18)
