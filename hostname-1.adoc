@@ -1,0 +1,47 @@
+= HOSTNAME(1)
+
+* Linux Programmer's Manual
+
+== Name
+
+* hostname - show or set the system's host name
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*hostname [-b|--boot] [-F|--file filename] [hostname]*
+....
+
+== Description
+
+* Hostname is used to display the system's DNS name, and to display or set its
+  hostname or NIS domain name.
+
+=== Get name
+
+* When called without any arguments, the program displays the current names:
+** *hostname* will print the name of the system as returned by the
+   gethostname(2) function.
+
+=== Set name
+
+* When called with one argument or with the *--file* option, the commands set
+  the host name or the NIS/YP domain name.
+* *hostname* uses the *sethostname*(2) function.
+* Note, that this is effective only until the next reboot.
+* Edit /etc/hostname for permanent change.
+
+'''
+
+* Note, that only the super-user can change the names.
+
+'''
+
+* The host name is usually set once at system startup in
+  [.underline]#/etc/init.d/hostname.sh# (normally by reading the contents of a
+  file which contains the host name, e.g. [.underline]#/etc/hostname#).
+
+'''
+
+* net-tools, 2009-09-16
