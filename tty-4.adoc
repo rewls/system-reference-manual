@@ -1,0 +1,17 @@
+= tty(4)
+
+* Kernel Interfaces Manual
+
+== Name
+
+* tty - controlling terminal
+
+== Description
+
+* The file [.underline]#/dev/tty# is a character file with major number 5 and
+  minor number 0, usually with mode 0666 and ownership root:tty.
+* It is a synonym for the controlling terminal of a process, if any.
+
+'''
+
+* Linux man-pages 6.03, 2022-10-30
