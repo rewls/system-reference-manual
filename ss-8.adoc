@@ -1,0 +1,46 @@
+= SS(8)
+
+* System Manager's Manual
+
+== Name
+
+* ss - another utility to investigate sockets
+
+== Synopsis
+
+[subs="attributes,quotes+"]
+....
+*ss* {startsb}[.underline]##options##] [.underline]#[ FILTER ]#
+....
+
+== Description
+
+* *ss* is used to dump socket statistics.
+* It allows showing information similar to netstat.
+* It can display more TCP and state information than other tools.
+
+== Options
+
+* When no option is used ss displays a list of open non-listening sockets
+  (e.g. TCP/UNIX/UDP) that have established connection.
+
+'''
+
+-H, --no-header::
+* Suppress header line.
+
+-n, --numeric::
+* Do not try to resolve service names.
+* Show exact bandwidth values, instead of human-readable.
+
+-l, --listening::
+* Display only listening sockets (these are omitted by default).
+
+-p, --processes::
+* Show process using socket.
+
+-t, --tcp::
+* Display TCP sockets.
+
+-u, --udp::
+* Display UDP sockets.
