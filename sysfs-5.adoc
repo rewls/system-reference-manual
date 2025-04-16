@@ -56,6 +56,17 @@ mount -t sysfs sysfs /sys
 * These symbolic links refer to entries in the [.underline]#/sys/devices#
   directory.
 
+[.underline]#/sys/dev#::
+* This directory contains two subdirectories [.underline]#block/# and
+  [.underline]#char/#, corresponding, respectively, to the block and character devices on the system.
+* Inside each of these subdirectories are symbolic links with names of the
+  form [.underline]#major-ID#:[.underline]#minor-ID#, where the ID values correspond to the major and
+  minor ID of a specific device.
+* Each symbolic link points to the sysfs directory for a device.
+* The symbolic links inside [.underline]#/sys/dev# thus provide an easy way to
+  look up the *sysfs* interface using the device IDs returned by a call to
+  *stat*(2) (or similar).
+
 [.underline]#/sys/devices#::
 * This is a directory that contains a filesystem representation of the kernel
   device tree, which is a hierarchy of device structures within the kernel.
