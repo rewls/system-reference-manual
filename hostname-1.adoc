@@ -42,6 +42,65 @@
   [.underline]#/etc/init.d/hostname.sh# (normally by reading the contents of a
   file which contains the host name, e.g. [.underline]#/etc/hostname#).
 
+=== The fqdn
+
+* The FQDN (Fully Qualified Domain Name) of the system is the name that the
+  *resolver*(3) returns for the host name, such as,
+  [.underline]#ursula.example.com#.
+* It is usually the hostname followed by the DNS domain name (the part after the first dot).
+* You can check the FQDN using *hostname --fqdn* or the domain name using
+  *dnsdomainname*.
+
+'''
+
+* You cannot change the FQDN with *hostname* or *dnsdomainname*.
+
+'''
+
+* The recommended method of setting the FQDN is to make the hostname be an
+  alias for the fully qualified name using [.underline]#/etc/hosts#, DNS, or
+  NIS.
+* For example, if the hostname was "ursula", one might have a line in
+  [.underline]#/etc/hosts# which reads
++
+....
+127.0.1.1    ursula.example.com ursula
+....
+
+* Technically: The FQDN is the name *getaddrinfo*(3) returns for the host name
+  returned by *gethostname*(2).
+* The DNS domain name is the part after the first dot.
+
+'''
+
+* Therefore it depends on the configuration of the resolver (usually in
+  [.underline]#/etc/host.conf#) how you can change it.
+* Usually the hosts file is parsed before DNS or NIS, so it is most common to
+  change the FQDN in [.underline]#/etc/hosts#.
+
+'''
+
+* If a machine has multiple network interfaces/addresses or is used in a
+  mobile environment, then it may either have multiple FQDNs/domain names or
+  none at all.
+* Therefore avoid using *hostname --fqdn*, *hostname --domain* and
+  *dnsdomainname*.
+* *hostname --ip-address* is subject to the same limitations so it should be
+  avoided as well.
+
+== Files
+
+/etc/hostname::
+* Historically this file was supposed to only contain the hostname and not the
+  full canonical FQDN.
+* Nowadays most software is able to cope with a full FQDN here.
+* This file is read at boot time by the system initialization scripts to set
+  the hostname.
+
+/etc/hosts::
+* Usually, this is where one sets the domain name by aliasing the host name to
+  the FQDN.       
+
 '''
 
 * net-tools, 2009-09-16
