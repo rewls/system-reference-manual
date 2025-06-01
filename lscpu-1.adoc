@@ -112,7 +112,8 @@
 +
 '''
 
-* When specifying the [.underline]#list# argument, the string of option, equal sign (=), and list must not contain any blanks or other whitespace.
+* When specifying the [.underline]#list# argument, the string of option, equal
+  sign (=), and list must not contain any blanks or other whitespace.
 * Examples: '*-p=cpu,node*' or '*--parse=cpu,node*'.
 +
 '''

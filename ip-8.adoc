@@ -28,7 +28,6 @@ route::
 * The names of all objects may be written in full or abbreviated form, for
   example *address* can be abbreviated as *addr* or just *a*.
 
-
 === [.underline]#COMMAND#
 
 * Specifies the action to perform on the object.

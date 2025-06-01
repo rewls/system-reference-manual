@@ -1,0 +1,43 @@
+= IP-ADDRESS(8)
+
+* Linux
+
+== Name
+
+* ip-address - protocol address management
+
+== Synopsis
+
+
+[subs="attributes,quotes+"]
+....
+*ip* {startsb} [.underline]#OPTIONS# ] *address* { [.underline]#COMMAND# | *help* }
+
+*ip address* {startsb} *show* {startsb} *dev* [.underline]#IFNAME# ] ]
+....
+
+== Description
+
+* The address is a protocol (IPv4 or IPv6) address attached to a network
+  device.
+* Each device must have at least one address to use the corresponding
+  protocol.
+* It is possible to have several different addresses attached to one device.
+* These addresses are not discriminated, so that the term *alias* is not quite
+  appropriate for them and we do not use it in this document.
+
+'''
+
+* The *ip address* command displays addresses and their properties, adds new
+  addresses and deletes old ones.
+
+'''
+
+`*ip address show*`::
+* look at protocol addresses
+`*dev* [.underline]#IFNAME#` (default)::
+* name of device.
+
+'''
+
+* iproute2, 20 Dec 2011
