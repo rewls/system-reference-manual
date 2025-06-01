@@ -5,30 +5,42 @@
 == Name
 
 * hostname - show or set the system's host name
+* domainname - show or set the system's NIS/YP domain name
+* ypdomainname - show or set the system's NIS/YP domain name
+* nisdomainname - show or set the system's NIS/YP domain name
+* dnsdomainname - show the system's DNS domain name
 
 == Synopsis
 
 [subs="attributes,quotes+"]
 ....
-*hostname [-b|--boot] [-F|--file filename] [hostname]*
+*hostname* [*-f|--fqdn|--long*]
+*hostname* [*-b|--boot*] [*-F|--file filename*] [*hostname*]
 ....
 
 == Description
 
-* Hostname is used to display the system's DNS name, and to display or set its
-  hostname or NIS domain name.
+* *Hostname* is used to display the system's DNS name, and to display or set
+  its hostname or NIS domain name.
 
 === Get name
 
 * When called without any arguments, the program displays the current names:
-** *hostname* will print the name of the system as returned by the
-   gethostname(2) function.
+* *hostname* will print the name of the system as returned by the
+  *gethostname*(2) function.
+* *domainname* will print the NIS domainname of the system.
+* *domainname* uses the *gethostname*(2) function, while *ypdomainname* and
+  *nisdomainname* use the *getdomainname*(2).
+* *dnsdomainname* will print the domain part of the FQDN (Fully Qualified Domain Name).
+* The complete FQDN of the system is returned with *hostname  --fqdn* (but see
+  the warnings in section *THE FQDN below*).
 
 === Set name
 
 * When called with one argument or with the *--file* option, the commands set
   the host name or the NIS/YP domain name.
-* *hostname* uses the *sethostname*(2) function.
+* *hostname* uses the *sethostname*(2) function, while all of the three
+  *domainname*, *ypdomainname* and *nisdomainname* use *setdomainname*(2)
 * Note, that this is effective only until the next reboot.
 * Edit /etc/hostname for permanent change.
 
@@ -38,11 +50,16 @@
 
 '''
 
+* It is not possible to set the FQDN or the DNS domain name with the
+  *dnsdomainname* command (see *THE FQDN* below).
+
+'''
+
 * The host name is usually set once at system startup in
   [.underline]#/etc/init.d/hostname.sh# (normally by reading the contents of a
   file which contains the host name, e.g. [.underline]#/etc/hostname#).
 
-=== The fqdn
+=== The FQDN
 
 * The FQDN (Fully Qualified Domain Name) of the system is the name that the
   *resolver*(3) returns for the host name, such as,
