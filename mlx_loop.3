@@ -1,0 +1,194 @@
+.TH MiniLibX 3 "September 19, 2002"
+
+.SH NAME
+
+MiniLibX - Handle events
+
+.SH SYNOPSYS
+
+.nf
+.I int
+.fi
+.B mlx_loop
+(
+.I void *mlx_ptr
+);
+
+.nf
+.I int
+.fi
+.B mlx_key_hook
+(
+.I void *win_ptr, int (*funct_ptr)(), void *param
+);
+
+.nf
+.I int
+.fi
+.B mlx_mouse_hook
+(
+.I void *win_ptr, int (*funct_ptr)(), void *param
+);
+
+.nf
+.I int
+.fi
+.B mlx_expose_hook
+(
+.I void *win_ptr, int (*funct_ptr)(), void *param
+);
+
+.nf
+.I int
+.fi
+.B mlx_loop_hook
+(
+.I void *mlx_ptr, int (*funct_ptr)(), void *param
+);
+
+.SH X-WINDOW EVENTS
+
+.IP \[bu] 3
+The X-Window system is bi-directionnal.
+.IP \[bu]
+On one hand, the program sends orders to
+the screen to display pixels, images, and so on.
+.IP \[bu]
+On the other hand,
+it can get information from the keyboard and mouse associated to
+the screen.
+.IP \[bu]
+To do so, the program receives "events" from the keyboard or the
+mouse.
+
+.SH DESCRIPTION
+
+.IP \[bu] 3
+To receive events, you must use
+.B mlx_loop
+().
+.IP \[bu]
+This function never returns.
+.IP \[bu]
+It is an infinite loop that waits for
+an event, and then calls a user-defined function associated with this event.
+.IP \[bu]
+A single parameter is needed, the connection identifier
+.I mlx_ptr
+(see the
+.B mlx manual).
+.P
+-
+.IP \[bu] 3
+You can assign different functions to the three following events:
+.RS
+.IP \[bu] 3
+A key is pressed
+.IP \[bu]
+The mouse button is pressed
+.IP \[bu]
+A part of the window should be re-drawn
+(this is called an "expose" event, and it is your program's job to handle it).
+.RE
+.P
+-
+.IP \[bu] 3
+Each window can define a different function for the same event.
+.P
+-
+.IP \[bu] 3
+The three functions
+.B mlx_key_hook
+(),
+.B mlx_mouse_hook
+() and
+.B mlx_expose_hook
+() work exactly the same way.
+.IP \[bu]
+.I funct_ptr
+is a pointer to the function you want to be called
+when an event occurs.
+.IP \[bu]
+This assignment is specific to the window defined by the
+.I win_ptr
+identifier.
+.IP \[bu]
+The
+.I param
+address will be passed to the function every time it is called, and should be
+used to store the parameters it might need.
+.P
+-
+.IP \[bu]
+The syntax for the
+.B mlx_loop_hook
+() function is identical to the previous ones, but the given function will be
+called when no event occurs.
+.P
+-
+.IP \[bu] 3
+When it catches an event, the MiniLibX calls the corresponding function
+with fixed parameters:
+.nf
+
+  expose_hook(void *param);
+  key_hook(int keycode,void *param);
+  mouse_hook(int button,int x,int y,void *param);
+  loop_hook(void *param);
+
+.fi
+.IP \[bu]
+These function names are arbitrary.
+.IP \[bu]
+They here are used to distinguish
+parameters according to the event.
+.IP \[bu]
+These functions are NOT part of the
+MiniLibX.
+.P
+-
+.IP \[bu]
+.I param
+is the address specified in the mlx_*_hook calls.
+.IP \[bu]
+This address is never
+used nor modified by the MiniLibX.
+.IP \[bu]
+On key and mouse events, additional
+information is passed:
+.I keycode
+tells you which key is pressed (look for the X11 include file "keysymdef.h"),
+(
+.I x
+,
+.I y
+) are the coordinates of the mouse click in the window, and
+.I button
+tells you which mouse button was pressed.
+
+.SH GOING FURTHER WITH EVENTS
+
+.IP \[bu] 3
+The MiniLibX provides a much generic access to all X-Window events.
+.IP \[bu] 3
+The
+.I mlx.h
+include define
+.B mlx_hook()
+in the same manner mlx_*_hook functions work.
+.IP \[bu]
+The event and mask values
+will be taken from the X11 include file "X.h".
+.P
+-
+.IP \[bu] 3
+See source code of mlx_int_param_event.c to find out how the MiniLibX will
+call your own function for a specific event.
+
+.SH SEE ALSO
+
+mlx(3), mlx_new_window(3), mlx_pixel_put(3), mlx_new_image(3)
+
+.SH AUTHOR
+
+Copyright ol@ - 2002-2014 - Olivier Crouzet
