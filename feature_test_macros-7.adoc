@@ -27,6 +27,8 @@
 #define _GNU_SOURCE
 #include <xyz.h>
 
+====
+
 * Some feature test macros are useful for creating portable applications, by
   preventing nonstandard definitions from being exposed.
 * Other macros can be used to expose nonstandard definitions that are not

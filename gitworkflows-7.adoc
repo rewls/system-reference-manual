@@ -1,4 +1,4 @@
-= GITWORKFLOWS
+= GITWORKFLOWS(7)
 :source-highlighter: rouge
 
 == Name
@@ -451,9 +451,8 @@ git pull <URL> <branch>
 
 ==== Example 14. format-patch/am: Keeping topics up to date
 
-* *git pull --rebase <URL> <branch>*
-
-'''
+[source,sh]
+git pull --rebase <URL> <branch>
 
 * You can then fix the conflicts during the rebase.
 * Presumably you have not published your topic other than by mail, so rebasing

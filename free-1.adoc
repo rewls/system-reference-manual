@@ -10,7 +10,7 @@
 
 [subs="attributes,quotes+"]
 ....
-*free* {startsb}[.underline]#options#]
+*free* {startsb}[.underline]##options##]
 ....
 
 == Description

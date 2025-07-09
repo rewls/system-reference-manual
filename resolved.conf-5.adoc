@@ -1,6 +1,6 @@
 = RESOLVED.CONF(5)
 
-= Name
+== Name
 
 * resolved.conf, resolved.conf.d - Network Name Resolution configuration files
 

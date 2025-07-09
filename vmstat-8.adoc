@@ -10,7 +10,7 @@
 
 [subs="attributes,quotes+"]
 ....
-*vmstat* [options] {startsb}[.underline]#delay# {startsb}[.underline]#count#]]
+*vmstat* [options] {startsb}[.underline]##delay## {startsb}[.underline]##count##]]
 ....
 
 == Description

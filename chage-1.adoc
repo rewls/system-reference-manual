@@ -10,7 +10,7 @@
 
 [subs="attributes,quotes+"]
 ....
-*chage* {startsb}[.underline]#options#] [.underline]#LOGIN#
+*chage* {startsb}[.underline]##options##] [.underline]#LOGIN#
 ....
 
 == Description

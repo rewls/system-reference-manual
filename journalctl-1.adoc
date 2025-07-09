@@ -8,6 +8,8 @@
 
 == Synopsis
 
+
+[subs="attributes,quotes+"]
 ....
 *journalctl* [OPTIONS...] [MATCHES...]
 ....

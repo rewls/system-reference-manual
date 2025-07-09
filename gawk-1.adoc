@@ -7,11 +7,12 @@
 
 == Synopsis
 
-`*gawk* [ POSIX or GNU style options ] -f [.underline]#program-file# [ -- ] file
-\...`
+[subs="attributes,quotes+"]
+....
+*gawk* [ POSIX or GNU style options ] -f [.underline]#program-file# [ -- ] file ...
+*gawk* [ POSIX or GNU style options ] [ -- ] [.underline]#program-text# file ...
+....
 
-`*gawk* [ POSIX or GNU style options ] [ -- ] [.underline]#program-text# file
-\...`
 
 == Description
 
@@ -41,20 +42,20 @@
 * An AWK program consists of a sequence of optional directives, pattern-action
   statements, and optional function definitions.
 +
-`**@include "**[.underline]#filename#**"**`
-+
-`**@load "**[.underline]#filename#**"**`
-+
-`**@namespace "**[.underline]#name#**"**`
-+
-`[.underline]#pattern# *{* [.underline]#action statements# *}*`
-+
-`*function* [.underline]#name#**(**[.underline]#parameter list#*)* *{*
-[.underline]#statements# *}*`
+[subs="attributes,quotes+"]
+....
+@*include* "[.underline]#filename#"
+@*load* "[.underline]#filename#"
+@*namespace* "[.underline]#name#"
+[.underline]#pattern# *{* [.underline]#action statements# *}*
+*function* [.underline]#name#**(**[.underline]#parameter list#*)* *{* [.underline]#statements# *}*
+....
 
 * [.underline]#Gawk# first reads the program source from the
   [.underline]#program-file#(s) if specified, from arguments to
   `*--source*`, or from the first non-option argument on the command line.
+
+'''
 
 * [.underline]#Gawk# executes AWK programs in the following order.
 * Next, [.underline]#gawk# compiles the program into an internal form.

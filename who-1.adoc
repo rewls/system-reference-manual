@@ -10,7 +10,7 @@
 
 [subs="attributes,quotes+"]
 ....
-*who* {startsb}[.underline]#OPTION#]... [ [.underline]#FILE# [.underline]#|# [.underline]#ARG1# [.underline]#ARG2# ]
+*who* {startsb}[.underline]##OPTION##]... {startsb} [.underline]#FILE# [.underline]#|# [.underline]#ARG1# [.underline]#ARG2# ]
 ....
 
 == Description

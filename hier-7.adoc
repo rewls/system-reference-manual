@@ -10,6 +10,8 @@
 
 * A typical Linux system has, among others, the following directories:
 
+'''
+
 [.underline]#/#::
 * This is the root directory.
 * This is where the whole tree starts.
