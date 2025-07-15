@@ -417,6 +417,59 @@ by \fB\-O2\fR and also turns on the following optimization flags:
 \&\-fversion\-loops\-for\-strides\fR
 .RE
 
+.IP \fB\-fsanitize=address\fR 4
+.IX Item "-fsanitize=address"
+.RS
+.IP \[bu] 3
+Enable AddressSanitizer, a fast memory error detector.
+.IP \[bu]
+Memory access instructions are instrumented to detect
+out-of-bounds and use-after-free bugs.
+.IP \[bu]
+The option enables \fB\-fsanitize\-address\-use\-after\-scope\fR.
+.IP \[bu]
+See <\fBhttps://github.com/google/sanitizers/wiki/AddressSanitizer\fR> for
+more details.
+.IP \[bu]
+The run-time behavior can be influenced using the
+\&\fBASAN_OPTIONS\fR environment variable.
+.IP \[bu]
+When set to \f(CW\*(C`help=1\*(C'\fR,
+the available options are shown at startup of the instrumented program.
+.IP \[bu]
+See
+<\fBhttps://github.com/google/sanitizers/wiki/AddressSanitizerFlags#run\-time\-flags\fR>
+for a list of supported options.
+.IP \[bu]
+The option cannot be combined with \fB\-fsanitize=thread\fR or
+\&\fB\-fsanitize=hwaddress\fR.
+.IP \[bu]
+Note that the only targets
+\&\fB\-fsanitize=hwaddress\fR is currently supported on are x86\-64
+(only with \f(CW\*(C`\-mlam=u48\*(C'\fR or \f(CW\*(C`\-mlam=u57\*(C'\fR options) and AArch64,
+in both cases only in ABIs with 64\-bit pointers.
+.P
+-
+.IP \[bu] 3
+When compiling with \fB\-fsanitize=address\fR, you should also
+use \fB\-g\fR to produce more meaningful output.
+.IP \[bu]
+To get more accurate stack traces, it is possible to use options such as
+\&\fB\-O0\fR, \fB\-O1\fR, or \fB\-Og\fR (which, for instance, prevent
+most function inlining), \fB\-fno\-optimize\-sibling\-calls\fR (which prevents
+optimizing sibling and tail recursive calls; this option is implicit for
+\&\fB\-O0\fR, \fB\-O1\fR, or \fB\-Og\fR), or \fB\-fno\-ipa\-icf\fR (which
+disables Identical Code Folding for functions).
+.IP \[bu]
+Using \fB\-fno\-omit\-frame\-pointer\fR also improves stack traces.
+.IP \[bu]
+Since multiple runs of the
+program may yield backtraces with different addresses due to ASLR (Address
+Space Layout Randomization), it may be desirable to turn ASLR off.
+.IP \[bu]
+On Linux,
+this can be achieved with \fBsetarch `uname \-m` \-R ./prog\fR.
+
 .SS "Options Controlling the Preprocessor"
 .IX Subsection "Options Controlling the Preprocessor"
 
