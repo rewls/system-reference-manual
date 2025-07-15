@@ -192,6 +192,231 @@ listing and explanation of the binary and decimal byte size prefixes.
 .SH OPTIONS
 .IX Header "OPTIONS"
 
+.SS "Options That Control Optimization"
+.IX Subsection "Options That Control Optimization"
+
+.IP \[bu] 3
+These options control various sorts of optimizations.
+.PP
+-
+.IP \[bu] 3
+Without any optimization option, the compiler's goal is to reduce the
+cost of compilation and to make debugging produce the expected
+results.
+.IP \[bu]
+Statements are independent: if you stop the program with a
+breakpoint between statements, you can then assign a new value to any
+variable or change the program counter to any other statement in the
+function and get exactly the results you expect from the source
+code.
+.PP
+-
+.IP \[bu] 3
+Turning on optimization flags makes the compiler attempt to improve
+the performance and/or code size at the expense of compilation time
+and possibly the ability to debug the program.
+.PP
+-
+.IP \[bu] 3
+The compiler performs optimization based on the knowledge it has of the
+program.
+.IP \[bu]
+Compiling multiple files at once to a single output file mode allows
+the compiler to use information gained from all of the files when compiling
+each of them.
+.PP
+-
+.IP \[bu] 3
+Not all optimizations are controlled directly by a flag.
+.IP \[bu]
+Only
+optimizations that have a flag are listed in this section.
+.PP
+-
+.IP \[bu] 3
+Most optimizations are completely disabled at \fB\-O0\fR or if an
+\&\fB\-O\fR level is not set on the command line, even if individual
+optimization flags are specified.
+.IP \[bu]
+Similarly, \fB\-Og\fR suppresses
+many optimization passes.
+.PP
+-
+.IP \[bu] 3
+Depending on the target and how GCC was configured, a slightly different
+set of optimizations may be enabled at each \fB\-O\fR level than
+those listed here.
+.IP \[bu]
+You can invoke GCC with \fB\-Q \-\-help=optimizers\fR
+to find out the exact set of optimizations that are enabled at each level.
+.IP \fB\-O\fR 4
+.IX Item "-O"
+.PD 0
+.IP \fB\-O1\fR 4
+.IX Item "-O1"
+.PD
+.RS
+.IP \[bu] 3
+Optimize.
+.IP \[bu]
+Optimizing compilation takes somewhat more time, and a lot
+more memory for a large function.
+.P
+-
+.IP \[bu] 3
+With \fB\-O\fR, the compiler tries to reduce code size and execution
+time, without performing any optimizations that take a great deal of
+compilation time.
+.P
+-
+.IP \[bu] 3
+\&\fB\-O\fR is the recommended optimization level for large machine-generated
+code as a sensible balance between time taken to compile and memory use:
+higher optimization levels perform optimizations with greater algorithmic
+complexity than at \fB\-O\fR.
+.IP \[bu]
+\&\fB\-O\fR turns on the following optimization flags:
+.P
+-
+\&\fB\-fauto\-inc\-dec
+\&\-fbranch\-count\-reg
+\&\-fcombine\-stack\-adjustments
+\&\-fcompare\-elim
+\&\-fcprop\-registers
+\&\-fdce
+\&\-fdefer\-pop
+\&\-fdelayed\-branch
+\&\-fdse
+\&\-fforward\-propagate
+\&\-fguess\-branch\-probability
+\&\-fif\-conversion
+\&\-fif\-conversion2
+\&\-finline\-functions\-called\-once
+\&\-fipa\-modref
+\&\-fipa\-profile
+\&\-fipa\-pure\-const
+\&\-fipa\-reference
+\&\-fipa\-reference\-addressable
+\&\-fivopts
+\&\-fmerge\-constants
+\&\-fmove\-loop\-invariants
+\&\-fmove\-loop\-stores
+\&\-fomit\-frame\-pointer
+\&\-freorder\-blocks
+\&\-fshrink\-wrap
+\&\-fshrink\-wrap\-separate
+\&\-fsplit\-wide\-types
+\&\-fssa\-backprop
+\&\-fssa\-phiopt
+\&\-ftree\-bit\-ccp
+\&\-ftree\-ccp
+\&\-ftree\-ch
+\&\-ftree\-coalesce\-vars
+\&\-ftree\-copy\-prop
+\&\-ftree\-dce
+\&\-ftree\-dominator\-opts
+\&\-ftree\-dse
+\&\-ftree\-forwprop
+\&\-ftree\-fre
+\&\-ftree\-phiprop
+\&\-ftree\-pta
+\&\-ftree\-scev\-cprop
+\&\-ftree\-sink
+\&\-ftree\-slsr
+\&\-ftree\-sra
+\&\-ftree\-ter
+\&\-funit\-at\-a\-time\fR
+.RE
+
+.IP \fB\-O2\fR 4
+.IX Item "-O2"
+.RS
+.IP \[bu] 3
+Optimize even more.
+.IP \[bu]
+GCC performs nearly all supported optimizations
+that do not involve a space-speed tradeoff.
+.IP \[bu]
+As compared to \fB\-O\fR, this option increases both compilation time
+and the performance of the generated code.
+.P
+-
+.IP \[bu] 3
+\&\fB\-O2\fR turns on all optimization flags specified by \fB\-O1\fR.
+.IP \[bu]
+It
+also turns on the following optimization flags:
+.P
+-
+\&\fB\-falign\-functions  \-falign\-jumps
+\&\-falign\-labels  \-falign\-loops
+\&\-fcaller\-saves
+\&\-fcode\-hoisting
+\&\-fcrossjumping
+\&\-fcse\-follow\-jumps  \-fcse\-skip\-blocks
+\&\-fdelete\-null\-pointer\-checks
+\&\-fdevirtualize  \-fdevirtualize\-speculatively
+\&\-fexpensive\-optimizations
+\&\-ffinite\-loops
+\&\-fgcse  \-fgcse\-lm
+\&\-fhoist\-adjacent\-loads
+\&\-finline\-functions
+\&\-finline\-small\-functions
+\&\-findirect\-inlining
+\&\-fipa\-bit\-cp  \-fipa\-cp  \-fipa\-icf
+\&\-fipa\-ra  \-fipa\-sra  \-fipa\-vrp
+\&\-fisolate\-erroneous\-paths\-dereference
+\&\-flra\-remat
+\&\-foptimize\-crc
+\&\-foptimize\-sibling\-calls
+\&\-foptimize\-strlen
+\&\-fpartial\-inlining
+\&\-fpeephole2
+\&\-freorder\-blocks\-algorithm=stc
+\&\-freorder\-blocks\-and\-partition  \-freorder\-functions
+\&\-frerun\-cse\-after\-loop
+\&\-fschedule\-insns  \-fschedule\-insns2
+\&\-fsched\-interblock  \-fsched\-spec
+\&\-fstore\-merging
+\&\-fstrict\-aliasing
+\&\-fthread\-jumps
+\&\-ftree\-builtin\-call\-dce
+\&\-ftree\-loop\-vectorize
+\&\-ftree\-pre
+\&\-ftree\-slp\-vectorize
+\&\-ftree\-switch\-conversion  \-ftree\-tail\-merge
+\&\-ftree\-vrp
+\&\-fvect\-cost\-model=very\-cheap\fR
+.IP \[bu] 3
+Please note the warning under \fB\-fgcse\fR about
+invoking \fB\-O2\fR on programs that use computed gotos.
+.RE
+
+.IP \fB\-O3\fR 4
+.IX Item "-O3"
+.RS
+.IP \[bu] 3
+Optimize yet more.
+.IP \[bu]
+\fB\-O3\fR turns on all optimizations specified
+by \fB\-O2\fR and also turns on the following optimization flags:
+.P
+-
+\&\fB\-fgcse\-after\-reload
+\&\-fipa\-cp\-clone
+\&\-floop\-interchange
+\&\-floop\-unroll\-and\-jam
+\&\-fpeel\-loops
+\&\-fpredictive\-commoning
+\&\-fsplit\-loops
+\&\-fsplit\-paths
+\&\-ftree\-loop\-distribution
+\&\-ftree\-partial\-pre
+\&\-funswitch\-loops
+\&\-fvect\-cost\-model=dynamic
+\&\-fversion\-loops\-for\-strides\fR
+.RE
+
 .SS "Options Controlling the Preprocessor"
 .IX Subsection "Options Controlling the Preprocessor"
 
@@ -332,11 +557,13 @@ For example, \fB\-MT\ '$(objpfx)foo.o'\fR might give
 \&\fBcpp\fR\|(1), \fBgcov\fR\|(1), \fBas\fR\|(1), \fBld\fR\|(1), \fBgdb\fR\|(1)
 and the Info entries for \fIgcc\fR, \fIcpp\fR, \fIas\fR,
 \&\fIld\fR, \fIbinutils\fR and \fIgdb\fR.
+
 .SH AUTHOR
 .IX Header "AUTHOR"
 See the Info entry for \fBgcc\fR, or
 <\fBhttps://gcc.gnu.org/onlinedocs/gcc/Contributors.html\fR>,
 for contributors to GCC.
+
 .SH COPYRIGHT
 .IX Header "COPYRIGHT"
 Copyright (c) 1988\-2025 Free Software Foundation, Inc.
