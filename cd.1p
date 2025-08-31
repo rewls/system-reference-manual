@@ -1,0 +1,438 @@
+'\" et
+.TH CD "1P" 2017 "IEEE/The Open Group" "POSIX Programmer's Manual"
+
+.\"
+.SH PROLOG
+
+.IP \[bu] 3
+This manual page is part of the POSIX Programmer's Manual.
+.IP \[bu]
+The Linux implementation of this interface may differ (consult
+the corresponding Linux manual page for details of Linux behavior),
+or the interface may not be implemented on Linux.
+
+.\"
+.SH NAME
+
+cd
+\(em change the working directory
+
+.SH SYNOPSIS
+
+.LP
+.nf
+cd \fB[\fR-L|-P\fB] [\fIdirectory\fB]\fR
+.P
+cd -
+.fi
+
+.SH DESCRIPTION
+
+.IP \[bu] 3
+The
+.IR cd
+utility shall change the working directory of the current shell
+execution environment (see
+.IR "Section 2.12" ", " "Shell Execution Environment")
+by executing the following steps in sequence.
+.IP \[bu]
+(In the following steps,
+the symbol
+.BR curpath
+represents an intermediate value used to simplify the description of
+the algorithm used by
+.IR cd .
+.IP \[bu]
+There is no requirement that
+.BR curpath
+be made visible to the application.)
+.RS
+.IP " 1." 4
+If no
+.IR directory
+operand is given and the
+.IR HOME
+environment variable is empty or undefined, the default behavior is
+implementation-defined and no further steps shall be taken.
+.IP " 2." 4
+If no
+.IR directory
+operand is given and the
+.IR HOME
+environment variable is set to a non-empty value, the
+.IR cd
+utility shall behave as if the directory named in the
+.IR HOME
+environment variable was specified as the
+.IR directory
+operand.
+.IP " 3." 4
+If the
+.IR directory
+operand begins with a
+<slash>
+character, set
+.BR curpath
+to the operand and proceed to step 7.
+.IP " 4." 4
+If the first component of the
+.IR directory
+operand is dot or dot-dot, proceed to step 6.
+.IP " 5." 4
+Starting with the first pathname in the
+<colon>-separated
+pathnames of
+.IR CDPATH
+(see the ENVIRONMENT VARIABLES section) if the pathname is non-null,
+test if the concatenation of that pathname, a
+<slash>
+character if that pathname did not end with a
+<slash>
+character, and the
+.IR directory
+operand names a directory.
+.br
+If the pathname is null, test if the
+concatenation of dot, a
+<slash>
+character, and the operand names a directory.
+.br
+In either case, if the
+resulting string names an existing directory, set
+.BR curpath
+to that string and proceed to step 7.
+.br
+Otherwise, repeat this step with
+the next pathname in
+.IR CDPATH
+until all pathnames have been tested.
+.IP " 6." 4
+Set
+.BR curpath
+to the
+.IR directory
+operand.
+.IP " 7." 4
+If the
+.BR \-P
+option is in effect, proceed to step 10.
+.br
+If
+.BR curpath
+does not begin with a
+<slash>
+character, set
+.BR curpath
+to the string formed by the concatenation of the value of
+.IR PWD ,
+a
+<slash>
+character if the value of
+.IR PWD
+did not end with a
+<slash>
+character, and
+.BR curpath .
+.IP " 8." 4
+The
+.BR curpath
+value shall then be converted to canonical form as follows, considering
+each component from beginning to end, in sequence:
+.RS 4 
+.IP " a." 4
+Dot components and any
+<slash>
+characters that separate them from the next component shall be deleted.
+.IP " b." 4
+For each dot-dot component, if there is a preceding component and it is
+neither root nor dot-dot, then:
+.RS 4 
+.IP " i." 5
+If the preceding component does not refer (in the context of pathname
+resolution with symbolic links followed) to a directory, then the
+.IR cd
+utility shall display an appropriate error message and no further steps
+shall be taken.
+.IP ii. 5
+The preceding component, all
+<slash>
+characters separating the preceding component from dot-dot, dot-dot,
+and all
+<slash>
+characters separating dot-dot from the following component (if any)
+shall be deleted.
+.RE
+.IP " c." 4
+An implementation may further simplify
+.BR curpath
+by removing any trailing
+<slash>
+characters that are not also leading
+<slash>
+characters, replacing multiple non-leading consecutive
+<slash>
+characters with a single
+<slash>,
+and replacing three or more leading
+<slash>
+characters with a single
+<slash>.
+.br
+If, as a result of this canonicalization, the
+.BR curpath
+variable is null, no further steps shall be taken.
+.RE
+.IP " 9." 4
+If
+.BR curpath
+is longer than
+{PATH_MAX}
+bytes (including the terminating null) and the
+.IR directory
+operand was not longer than
+{PATH_MAX}
+bytes (including the terminating null), then
+.BR curpath
+shall be converted from an absolute pathname to an equivalent relative
+pathname if possible. This conversion shall always be considered
+possible if the value of
+.IR PWD ,
+with a trailing
+<slash>
+added if it does not already have one, is an initial substring of
+.BR curpath .
+.br
+Whether or not it is considered possible under other circumstances is
+unspecified.
+.br
+Implementations may also apply this conversion if
+.BR curpath
+is not longer than
+{PATH_MAX}
+bytes or the
+.IR directory
+operand was longer than
+{PATH_MAX}
+bytes.
+.IP 10. 4
+The
+.IR cd
+utility shall then perform actions equivalent to the
+\fIchdir\fR()
+function called with
+.BR curpath
+as the
+.IR path
+argument.
+.br
+If these actions fail for any reason, the
+.IR cd
+utility shall display an appropriate error message and the remainder of
+this step shall not be executed.
+.br
+If the
+.BR \-P
+option is not in effect, the
+.IR PWD
+environment variable shall be set to the value that
+.BR curpath
+had on entry to step 9 (i.e., before conversion to a relative
+pathname).
+.br
+If the
+.BR \-P
+option is in effect, the
+.IR PWD
+environment variable shall be set to the string that would be output by
+.IR pwd
+.BR \-P .
+If there is insufficient permission on the new directory, or on any
+parent of that directory, to determine the current working directory,
+the value of the
+.IR PWD
+environment variable is unspecified.
+.RE
+.IP \[bu]
+If, during the execution of the above steps, the
+.IR PWD
+environment variable
+is set, the
+.IR OLDPWD
+environment variable shall also be set to
+the value of the old working directory (that is the current working
+directory immediately prior to the call to
+.IR cd ).
+
+.SH OPERANDS
+
+.IP \[bu] 3
+The following operands shall be supported:
+.IP "\fIdirectory\fR" 10
+An absolute or relative pathname of the directory that shall become
+the new working directory.
+.br
+The interpretation of a relative pathname
+by
+.IR cd
+depends on the
+.BR \-L
+option and the
+.IR CDPATH
+and
+.IR PWD
+environment variables.
+.br
+If
+.IR directory
+is an empty string, the results are unspecified.
+.IP "\-" 10
+When a
+<hyphen-minus>
+is used as the operand, this shall be equivalent to the command:
+.RS 10 
+.sp
+.RS 4
+.nf
+
+cd "$OLDPWD" && pwd
+.fi
+.P
+.RE
+.P
+which changes to the previous working directory and then writes its
+name.
+.RE
+
+.SH STDIN
+
+Not used.
+
+.SH "INPUT FILES"
+
+None.
+
+.SH "ASYNCHRONOUS EVENTS"
+
+Default.
+
+.SH STDERR
+
+The standard error shall be used only for diagnostic messages.
+
+.SH "OUTPUT FILES"
+
+None.
+
+.SH "EXIT STATUS"
+
+.IP \[bu] 3
+The following exit values shall be returned:
+.IP "\00" 6
+The directory was successfully changed.
+.IP >0 6
+An error occurred.
+
+.SH "CONSEQUENCES OF ERRORS"
+
+.IP \[bu] 3
+The working directory shall remain unchanged.
+.P
+-
+.IP \[bu] 3
+.IR "The following sections are informative."
+
+.SH "APPLICATION USAGE"
+
+.IP \[bu] 3
+Since
+.IR cd
+affects the current shell execution environment, it is always provided
+as a shell regular built-in.
+.IP \[bu]
+If it is called in a subshell or separate
+utility execution environment, such as one of the following:
+.sp
+.RS 4
+.nf
+
+(cd /tmp)
+nohup cd
+find . -exec cd {} \e;
+.fi
+.P
+.RE
+.P
+it does not affect the working directory of the caller's environment.
+.P
+-
+.IP \[bu] 3
+The user must have execute (search) permission in
+.IR directory
+in order to change to it.
+
+.SH EXAMPLES
+
+.IP \[bu] 3
+The following template can be used to perform processing in the directory
+specified by
+.IR location
+and end up in the current working directory in use before the first
+.IR cd
+command was issued:
+.sp
+.RS 4
+.nf
+
+cd \fIlocation\fP
+if [ $? -ne 0 ]
+then
+    print error message
+    exit 1
+fi
+\&... do whatever is desired as long as the OLDPWD environment variable
+    is not modified
+cd -
+.fi
+.P
+.RE
+
+.SH "FUTURE DIRECTIONS"
+
+None.
+
+.SH "SEE ALSO"
+
+.IP \[bu] 3
+.IR "Section 2.12" ", " "Shell Execution Environment",
+.IR "\fIpwd\fR\^"
+.P
+-
+.IP \[bu] 3
+The Base Definitions volume of POSIX.1\(hy2017,
+.IR "Chapter 8" ", " "Environment Variables",
+.IR "Section 12.2" ", " "Utility Syntax Guidelines"
+.P
+-
+.IP \[bu] 3
+The System Interfaces volume of POSIX.1\(hy2017,
+.IR "\fIchdir\fR\^(\|)"
+.\"
+
+.SH COPYRIGHT
+
+Portions of this text are reprinted and reproduced in electronic form
+from IEEE Std 1003.1-2017, Standard for Information Technology
+-- Portable Operating System Interface (POSIX), The Open Group Base
+Specifications Issue 7, 2018 Edition,
+Copyright (C) 2018 by the Institute of
+Electrical and Electronics Engineers, Inc and The Open Group.
+In the event of any discrepancy between this version and the original IEEE and
+The Open Group Standard, the original IEEE and The Open Group Standard
+is the referee document. The original Standard can be obtained online at
+http://www.opengroup.org/unix/online.html .
+.PP
+Any typographical or formatting errors that appear
+in this page are most likely
+to have been introduced during the conversion of the source files to
+man page format. To report such errors, see
+https://www.kernel.org/doc/man-pages/reporting_bugs.html .
