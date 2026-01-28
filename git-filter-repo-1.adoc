@@ -1,0 +1,129 @@
+= git-filter-repo(1)
+:doctype: manpage
+
+== Name
+
+git-filter-repo - Rewrite repository history
+
+== Description
+
+* Rapidly rewrite entire repository history using user-specified filters.
+* This is a destructive operation which should not be used lightly; it writes
+  new commits, trees, tags, and blobs corresponding to (but filtered from) the
+  original objects in the repository, then deletes the original history and
+  leaves only the new.
+* See [DISCUSSION] for more details on the ramifications of using this tool.
+* Several different types of history rewrites are possible; examples include
+  (but are not limited to):
+
+'''
+
+* stripping large files (or large directories or large extensions)
+* stripping unwanted files by path
+* extracting wanted paths and their history (stripping everything else)
+* restructuring the file layout (such as moving all files into a subdirectory
+  in preparation for merging with another repo, making a subdirectory become
+  the new toplevel directory, or merging two directories with independent
+  filenames into one directory)
+* renaming tags (also often in preparation for merging with another repo)
+* replacing or removing sensitive text such as passwords
+* making mailmap rewriting of user names or emails permanent
+* making grafts or replacement refs permanent
+* rewriting commit messages
+
+'''
+
+* Additionally, several concerns are handled automatically (many of these can
+  be overridden, but they are all on by default):
+
+'''
+
+* rewriting (possibly abbreviated) hashes in commit messages to refer to the
+  new post-rewrite commit hashes
+* pruning commits which become empty due to the above filters (also handles
+  edge cases like pruning of merge commits which become degenerate and empty)
+* rewriting stashes
+* baking the changes made by refs/replace/ refs into the permanent history and
+  removing the replace refs
+* stripping of original history to avoid mixing old and new history
+* repacking the repository post-rewrite to shrink the repo for the user
+* And additional facilities are available via a config option
+* creating replace-refs (see git-replace(1)) for old commit hashes, which if
+  manually pushed and fetched will allow users to continue to refer to new
+  commits using (unabbreviated) old commit IDs
+
+'''
+
+* Also, it's worth noting that there is an important safety mechanism:
+
+'''
+
+* abort if run from a repo that is not a fresh clone (to prevent accidental
+  data loss from rewriting local history that doesn't exist anywhere else).
+  See [FRESHCLONE].
+
+'''
+
+* For those who know that there is large unwanted stuff in their history and
+  want help finding it, this command also
+
+'''
+
+* provides an option to analyze a repository and generate reports that can be
+  useful in determining what to filter (or in determining whether a separate
+  filtering command was successful).
+
+'''
+
+* See also [VERSATILITY], [DISCUSSION], [EXAMPLES], and [INTERNALS].
+
+== Examples
+
+=== Directory based shortcuts
+
+* Let's say you had a directory structure like the following:
+
+....
+module/
+   foo.c
+   bar.c
+otherDir/
+   blah.config
+   stuff.txt
+zebra.jpg
+....
+
+* If you wanted just the `module/` directory and you wanted it to become the
+  new root so that your new directory structure looked like
++
+....
+foo.c
+bar.c
+....
++
+then you could run:
++
+....
+git filter-repo --subdirectory-filter module/
+....
+
+* If you wanted all the files from the original repo, but wanted to move
+  everything under a subdirectory named `my-module/`, so that your new
+  directory structure looked like
++
+....
+my-module/
+   module/
+      foo.c
+      bar.c
+   otherDir/
+      blah.config
+      stuff.txt
+   zebra.jpg
+....
++
+then you would instead run run
++
+....
+git filter-repo --to-subdirectory-filter my-module/
+....
